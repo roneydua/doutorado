@@ -1,0 +1,15 @@
+{
+    "python.formatting.provider": "yapf",
+    // "path-intellisense.absolutePathTo": "../",
+    
+    "cSpell.enableFiletypes": [
+        "python"
+    ],
+    "python.analysis.typeCheckingMode": "basic",
+    "cSpell.words": [
+        "pymeasure"
+    ],
+    "python.linting.flake8Enabled": false,
+    "python.linting.enabled": false,
+    "python.linting.pylintEnabled": true
+}
