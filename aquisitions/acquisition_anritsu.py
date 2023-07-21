@@ -7,51 +7,52 @@
 @Contact :   roneyddasilva@gmail.com
 '''
 
-from pyvisa import ResourceManager
-import time
-import numpy as np
-import pickle
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-from pymeasure.instruments.anritsu import AnritsuMS9710C
-from auxiliaryClasses import Dynamometer
-import pandas as pd
-from pathlib import Path
-mpl.rcParams['figure.dpi'] = 72
-plt.style.use("../../../../programasComuns/roney3.mplstyle")
-
-# for save data
 from datetime import datetime
-ilx_control = True
-mike_control =False
-dynamometer_control = False
+from pathlib import Path
+
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from pymeasure.instruments.anritsu import AnritsuMS9710C
+from common_functions.common_functions import *
+from pyvisa import ResourceManager
+
+from aquisitions.auxiliary_classes import Dynamometer, EncoderMikeController
+
+mpl.rcParams['figure.dpi'] = 72
+plt.style.use("common_functions/roney3.mplstyle")
+
+ILX_CONTROL = True
+MIKE_CONTROL =False
+DYNAMOMETER_CONTROL = False
 # H - hour, M- minute, S - second
-folder_save = './data/15052023/erbium_source_test/'
+folder_save = "./../../experimentos/13072023/"
 # letter = 'f'
 # teste_save_name = letter+"_reflection_"+"4_percent_"
 # teste_save_name = letter+"_reflection_4_percent_"
-teste_save_name = 'laser_pump_1500mm_M12_'
+teste_save_name = 'fbg_3'
 
 
-def dbm2W(power):
-    return 10.0**(power * 0.1)
 
 class experiment_data_save():
 
     def __init__(self, size: int):
         self.df = pd.DataFrame()
         """Data frame with experiment data"""
-        self.df['wavelength'] = 1.0 + np.zeros(size, dtype=np.float32)
+        self.df['wavelength'] = np.zeros(size, dtype=np.float32)
         """Wavelength vector in nano memeter"""
-        self.df['power_dbm'] = 2.0 + np.zeros(size, dtype=np.float16)
+        self.df['power_dbm'] = np.zeros(size, dtype=np.float16)
         """Power vector in dBm * actual_resolution. WARNING: ned correction with 'actual resolution'"""
         #Variable necessary for the correction of the power value in decibels
         self.df['actual_resolution'] = '0.05'
         self.df['ilx_current'] = 0.0
         self.df['resolution_nm'] = 1.0
         self.df['resolution_vbw'] = '100Hz'
-        self.df['erbium_fiber_size'] = 21
-
+        self.df['traction_N'] = np.zeros(size, dtype=np.float16)
+        self.df['initial_length'] = np.zeros(size, dtype=np.float16)
+        self.df['micrometer_position'] = np.zeros(size, dtype=np.float16)
+        self.df['room_temperature_C'] = np.zeros(size, dtype=np.float16)
 
     def save(self, name):
         # self.df['power_dbm'] -= 10.0 * np.log10(self.df['actual_resolution'])
@@ -89,10 +90,12 @@ def test_setup():
     osa.write('ARES ON')  # osa.write("SRT")
     # osa.clear()
     osa.write(r'ARED?')
-    actual_resolution = float(osa.read())
-    ## ILX setup
+    # Only for
+    osa.read()
+    # ILX setup
     rm = ResourceManager()
     ilx = rm.open_resource('GPIB0::1::INSTR')
+    
     # put TEC on temperature mode
     ilx.write("TEC:MODE:T<NL>") # type: ignore
     # enable tec
@@ -101,11 +104,20 @@ def test_setup():
     ilx.write("LAS:OUT 1") # type: ignore
     # ilx.write("LAS:OUT 0")
     # set ILX current
-
+    if MIKE_CONTROL:
+        mike = EncoderMikeController(21e-3)
+        mike.getPositionY()
+        mike.sendCommand(3,"SV",300)
+        mike.goToZ(0)
+        mike.walkZ(-1.0)
+        # din.query("3TP")
+    if DYNAMOMETER_CONTROL:
+        dyn = Dynamometer()
+    
+    
     return osa, ilx
 
 def make_test(ilx, osa, _ilx_current:float):
-
     ilx_current = '{:2.1f}'.format(_ilx_current)
     ilx.write("LAS:LDI " + ilx_current)
     # teste_save_name = "TEAP_"

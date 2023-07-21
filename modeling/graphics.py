@@ -12,11 +12,11 @@ from numpy import abs
 import funcoesQuaternion as fq
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
-plt.style.use("../../../../programasComuns/roney3.mplstyle")
+plt.style.use("common_functions/roney3.mplstyle")
 cores = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 
-figL = 8.268 - 4 / 2.54
-figA = 0.75*(90.0) / 25.4
+FIG_L = 8.268 - 4 / 2.54
+FIG_A = 0.75*(90.0) / 25.4
 
 legAccel = ['Real', 'Estimated', 'MMQ']
 imageFolder = './../../images/'
@@ -31,7 +31,7 @@ def loadData(filename):
 def plot_all_states(s,name=''):
     if plt.fignum_exists(1):
         plt.close(1)
-    fig, ax = plt.subplots(4, 3, num=1, sharex=True,figsize=(figL,1.75*figA))
+    fig, ax = plt.subplots(4, 3, num=1, sharex=True,figsize=(FIG_L,1.75*FIG_A))
     ax[3][0].plot(s.t, s.x[16, :].T,lw=2, label="Mass")
     ax[3][0].plot(s.t, s.x[12, :].T,lw=1, label="Base")
 
@@ -66,7 +66,7 @@ def plot_all_states(s,name=''):
 def plot_deformations(s,name=''):
     if plt.fignum_exists(2):
         plt.close(2)
-    fig, ax = plt.subplots(3, 4, num=2, sharex=True,figsize=(figL,figA))
+    fig, ax = plt.subplots(3, 4, num=2, sharex=True,figsize=(FIG_L,FIG_A))
     for col in range(4):
         ax[0][col].plot(s.t[:-1],
                         s.deformation[col, :].T ,
@@ -98,7 +98,7 @@ def plot_deformations(s,name=''):
 def plot_euler(s,name=''):
     if plt.fignum_exists(3):
         plt.close(3)
-    fig, ax = plt.subplots(1, 3, num=3, sharex=True,figsize=(figL,figA))
+    fig, ax = plt.subplots(1, 3, num=3, sharex=True,figsize=(FIG_L,FIG_A))
     euler_b = np.zeros(shape=(3, s.t.size))
     euler_m = np.zeros(shape=(3, s.t.size))
     for i in range(s.t.size):
@@ -119,7 +119,7 @@ def plot_euler(s,name=''):
 def plot_accelerations(s,name=''):
     if plt.fignum_exists(4):
         plt.close(4)
-    fig, ax = plt.subplots(1, 3, num=4, sharex=True,figsize=(figL,figA))
+    fig, ax = plt.subplots(1, 3, num=4, sharex=True,figsize=(FIG_L,FIG_A))
     ax[0].set_ylabel(r'Aceleração, $\si{\meter\per\square\second}$')
     for i in range(3):
         ax[i].plot(s.t, s.true_accel[i, :], label=legAccel[0], lw=2)
@@ -140,7 +140,7 @@ def plot_accelerations(s,name=''):
 def plot_accelerations_error(s,name=''):
     if plt.fignum_exists(5):
         plt.close(5)
-    fig, ax = plt.subplots(3, 1, num=5, sharex=True,figsize=(figL,figA))
+    fig, ax = plt.subplots(3, 1, num=5, sharex=True,figsize=(FIG_L,FIG_A))
     ylabel = [r'$a_{x}$', r'$a_{y}$', r'$a_{z}$']
     for i in range(3):
         ax[i].plot(s.t, 1e3*(s.true_accel[i, :] - s.recover_accel_simple[i, :]),

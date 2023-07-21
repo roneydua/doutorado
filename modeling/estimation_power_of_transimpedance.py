@@ -8,9 +8,9 @@ from matplotlib import ticker
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 cores = plt.rcParams["axes.prop_cycle"].by_key()["color"]
-plt.style.use("../../../../programasComuns/roney3.mplstyle")
-figL = 6.29
-figA = (90.0) / 25.4
+plt.style.use("common_functions/roney3.mplstyle")
+FIG_L = 6.29
+FIG_A = (90.0) / 25.4
 
 folder_data = "data/19052023/"
 source = np.loadtxt(folder_data + "source1.txt")
@@ -44,7 +44,7 @@ x_plus_ref_power_mW = power_mW(x_plus_ref_fixed)
 y_minus_ref_power_mW = power_mW(y_minus_ref_fixed)
 y_plus_ref_power_mW = power_mW(y_plus_ref_fixed)
 
-fig, ax = plt.subplots(3, 1, num=1, sharex=True, figsize=(figL, figA))
+fig, ax = plt.subplots(3, 1, num=1, sharex=True, figsize=(FIG_L, FIG_A))
 ax[0].plot(source_fixed[:, 0],
            source_fixed[:, 1],
            label='Fonte(' + '{:2.2f}'.format(source_power_mW) +
@@ -71,7 +71,7 @@ ax[2].legend()
 fig.supylabel(r"\si{\milli\watt}")
 fig.supxlabel(r"$\lambda, \si{\nm}$")
 
-fig, ax = plt.subplots(1, 1, num=1, figsize=(figL, figA))
+fig, ax = plt.subplots(1, 1, num=1, figsize=(FIG_L, FIG_A))
 ax.plot(1e9 * source[1:, 0],
         source[1:, 1] - 10.0 * np.log10(1e9 * np.diff(source[:, 0])))
 

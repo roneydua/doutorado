@@ -16,11 +16,11 @@ import pandas as pd
 import glob
 
 # InteractiveShell.ast_node_interactivity = "all"
-plt.style.use("../../../../programasComuns/roney3.mplstyle")
+plt.style.use("common_functions/roney3.mplstyle")
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 my_colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
-figL = 6.29
-figA = (90.0) / 25.4
+FIG_L = 6.29
+FIG_A = (90.0) / 25.4
 
 folder = "./data/15052023/erbium_source_test/"
 
@@ -84,7 +84,7 @@ def laser_pump_vs_current():
                            1,
                            sharex=True,
                            num=1,
-                           figsize=(figL, 0.75 * figA))
+                           figsize=(FIG_L, 0.75 * FIG_A))
     # the first index of list_of_data is the fiber size, the sequence obeys the sequence of legend_fiber_size
     for _fiber in range(len(list_of_data)):
         # for _fiber in [0]:
@@ -138,7 +138,7 @@ def transimpedance_tension_vs_source_current():
     # 2.790 - 0.393
     if plt.fignum_exists(1):
         fig.clear()  # type: ignore
-    fig, ax = plt.subplots(1, 1, num=1, figsize=(figL, 0.75 * figA))
+    fig, ax = plt.subplots(1, 1, num=1, figsize=(FIG_L, 0.75 * FIG_A))
     for index in range(r.size):
         v = 17. / 480.0 * ktr * r[index] * s_i(i)
         # i = 1.0/2.790 * (1.5/17/480*230300*r + 0.393)
@@ -178,7 +178,7 @@ def transimpedance_tension_vs_source_current_transmission():
     # 2.790 - 0.393
     if plt.fignum_exists(1):
         fig.clear()  # type: ignore
-    fig, ax = plt.subplots(1, 1, num=1, figsize=(figL, 0.75 * figA))
+    fig, ax = plt.subplots(1, 1, num=1, figsize=(FIG_L, 0.75 * FIG_A))
     for index in range(r.size):
         v = 17. / 480.0 * ktr * (1.0 - r[index]) * s_i(i)
         # i = 1.0/2.790 * (1.5/17/480*230300*r + 0.393)
@@ -218,7 +218,7 @@ def transimpedance_tension_vs_gravity_with_gains():
         r'$y_-$', r'$z_{+}$', r'$z_-$', r'$y_+$', r'$x_{+}$', r'$x_-$'
     ]
     fig.clear()
-    fig, ax = plt.subplots(1, 1, num=1 , figsize=(figL, figA))
+    fig, ax = plt.subplots(1, 1, num=1 , figsize=(FIG_L, FIG_A))
     for i in range(6):
         graphic = p(i,deformation_vector)*1e-3
         ax.plot(gravity_vector,graphic,label=leg[i])
@@ -244,7 +244,7 @@ def transimpedance_tension_vs_gravity_with_constant_gains():
         r'$y_-$', r'$z_{+}$', r'$z_-$', r'$y_+$', r'$x_{+}$', r'$x_-$'
     ]
     fig.clear()
-    fig, ax = plt.subplots(1, 1, num=1 , figsize=(figL, figA))
+    fig, ax = plt.subplots(1, 1, num=1 , figsize=(FIG_L, FIG_A))
     for i in range(6):
         graphic = p(i,deformation_vector)*1e-3
         print(1e3*(graphic.max()-graphic.min()))

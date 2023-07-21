@@ -24,8 +24,8 @@ locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 cores = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 # plt.style.use("default")
 plt.style.use("~/Dropbox/pacotesPython/roney3.mplstyle")
-figL = 6.29
-figA = (90.0) / 25.4
+FIG_L = 6.29
+FIG_A = (90.0) / 25.4
 
 
 def dbm2W(power):

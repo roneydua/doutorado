@@ -23,11 +23,11 @@ from ipywidgets import fixed, interactive
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 # plt.style.use("default")
-plt.style.use("../../../../programasComuns/roney3.mplstyle")
+plt.style.use("common_functions/roney3.mplstyle")
 cores = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 
-figL = 6.29
-figA = (60.0) / 25.4
+FIG_L = 6.29
+FIG_A = (60.0) / 25.4
 
 l_peak = 1550.0
 delta_l = 5000
@@ -101,7 +101,7 @@ def plot_reflection_of_transmition(deformation=0.0):
 
 
 def plot_bragg_spectrum():
-    fig, ax = plt.subplots(1, 1, num=1, figsize=(figL, figA))
+    fig, ax = plt.subplots(1, 1, num=1, figsize=(FIG_L, FIG_A))
     ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
     ax.set_ylabel(r'Refletividade, \%')
     ax.set_xlabel(r'$\lambda, \si{\nm}$')
@@ -231,7 +231,7 @@ def plot_pot_vs_deformation():
         pot_reflection[i] = np.trapz(x=laser.wave_length * 1e-9, y=0.5*r * laser_power_w)
         pot_transmition[i] = np.trapz(x=laser.wave_length * 1e-9, y=1.0/6.0*(1.0 - r) * laser_power_w)
 
-    fig, ax = plt.subplots(2, 1, num=1, sharex=True, figsize=(figL, figA))
+    fig, ax = plt.subplots(2, 1, num=1, sharex=True, figsize=(FIG_L, FIG_A))
     fig.supylabel("$\\si{\\pico\\watt}$")
     fig.supxlabel(r"$\si{\micro\varepsilon}$")
     ax[0].plot(1e6*e,pot_reflection*1e12,label="Reflection")

@@ -15,8 +15,8 @@ locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 cores = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 # plt.style.use("default")
 plt.style.use("~/Dropbox/pacotesPython/roney3.mplstyle")
-figL = 6.29
-figA = (90.0) / 25.4
+FIG_L = 6.29
+FIG_A = (90.0) / 25.4
 from acquisitionAnritsu import dataAcquisition
 import os
 
@@ -34,7 +34,7 @@ def readData(t):
 
 
 def plot_Eirbium_source(dbm=True):
-    fig, ax = plt.subplots(1, 1, num=3, sharex=True, figsize=(figL, figA),dpi=144)
+    fig, ax = plt.subplots(1, 1, num=3, sharex=True, figsize=(FIG_L, FIG_A),dpi=144)
     current_of_ILX = np.arange(100,525,25)
     def readCsv():
         for i in range(len(current_of_ILX)):
@@ -61,7 +61,7 @@ plot_Eirbium_source(dbm=True)
 
 
 def twoColuns():
-    fig, ax = plt.subplots(3, 2, num=1, sharex=True, figsize=(figL, figA),dpi=144)
+    fig, ax = plt.subplots(3, 2, num=1, sharex=True, figsize=(FIG_L, FIG_A),dpi=144)
     def plotAx(_ax, name, _label):
         _da = readData(name)
         for i in range(1):
@@ -83,7 +83,7 @@ def twoColuns():
 
 
 
-fig, ax = plt.subplots(1, 1, num=2, sharex=True, figsize=(figL, figA),dpi=144)
+fig, ax = plt.subplots(1, 1, num=2, sharex=True, figsize=(FIG_L, FIG_A),dpi=144)
 def plotAx( name, _label):
     _da = readData(name)
     for i in range(1):

@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.linalg import inv
-import funcoesQuaternion as fq
+import common_functions.funcoesQuaternion as fq
 
 
 # Constates coordinates of connections

@@ -8,9 +8,9 @@ from matplotlib import ticker
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 cores = plt.rcParams["axes.prop_cycle"].by_key()["color"]
-plt.style.use("../../../../programasComuns/roney3.mplstyle")
-figL = 6.29
-figA = (90.0) / 25.4
+plt.style.use("common_functions/roney3.mplstyle")
+FIG_L = 6.29
+FIG_A = (90.0) / 25.4
 
 
 def dbm2W(power):
@@ -22,7 +22,7 @@ def plot_laser():
     def calc_laser(w, center_w, std=0.1 * 1e-9):
         return np.exp(-(w - center_w)**2 / (2.0 * std**2))
 
-    fig, ax = plt.subplots(1, 1, num=2,figsize=(figL/2,figA*.5))
+    fig, ax = plt.subplots(1, 1, num=2,figsize=(FIG_L/2,FIG_A*.5))
     data1 = '../../../../experimentos/25042023/laser_1549042523__131644.csv'
     laser_data = []
     laser_data.append(pd.read_csv(Path(data1)))

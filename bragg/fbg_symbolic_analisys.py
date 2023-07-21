@@ -17,12 +17,12 @@ from ipywidgets import fixed, interactive
 
 
 
-# InteractiveShell.ast_node_interactivity = "all"
+# Intera    ctiveShell.ast_node_interactivity = "all"
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
-plt.style.use("../../../../programasComuns/roney3.mplstyle")
+plt.style.use("common_functions/roney3.mplstyle")
 my_colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
-figL = 6.29
-figA = (90.0) / 25.4
+FIG_L = 6.29
+FIG_A = (90.0) / 25.4
 
 n_source = sp.symbols('r_{s}')
 "Noise of source "

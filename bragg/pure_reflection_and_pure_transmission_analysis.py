@@ -18,7 +18,7 @@ import numpy as np
 import sympy as sp
 from IPython.core.interactiveshell import InteractiveShell
 from ipywidgets import fixed, interact, interactive
-from mathModelAccel import AccelModel
+from modeling.mathModelAccel import AccelModel
 from matplotlib import ticker
 from IPython.display import display, Markdown
 
@@ -26,13 +26,13 @@ from bragg import Bragg
 from common_functions import *
 from pure_reflection_and_pure_transmission_analysis_Functions import *
 
-plt.style.use("./../../../../programasComuns/roney3.mplstyle")
+plt.style.use("./common_functions/roney3.mplstyle")
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 my_colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
-figL = 6.29
-figA = (90.0) / 25.4
+FIG_L = 6.29
+FIG_A = (90.0) / 25.4
 plt.rcParams["figure.dpi"] = 288
-plt.rcParams["figure.figsize"] = (figL, figA)
+plt.rcParams["figure.figsize"] = (FIG_L, FIG_A)
 # Create a FBG on lambda with 1550nm
 
 accel = AccelModel()
@@ -61,7 +61,7 @@ laser = 1e-3*calc_laser(w=bragg.wavelength_span,
                     center_w=1549.3 * 1e-9,
                     std=0.05 * 1e-9)
 def simple_plot():
-    fig, ax = plt.subplots(1, 2, num=1, figsize=(figL, figA))
+    fig, ax = plt.subplots(1, 2, num=1, figsize=(FIG_L, FIG_A))
     ax[0].plot(bragg.wavelength_span_nm, bragg.r0)
     total_power = np.trapz(x=bragg.wavelength_span, y=laser)
     ax[1].xaxis.set_major_locator(ticker.MultipleLocator(.5))
@@ -197,7 +197,7 @@ banda_larga = 1e-3 * 10. / 15. / 1e-9 * np.ones(laser.size)
 # banda_larga[250:] *= 0
 
 def simple_plot():
-    fig, ax = plt.subplots(1, 2, num=1, figsize=(figL, figA))
+    fig, ax = plt.subplots(1, 2, num=1, figsize=(FIG_L, FIG_A))
     ax[0].plot(bragg.wavelength_span_nm, bragg.r0)
     total_power = np.trapz(x=bragg.wavelength_span, y=banda_larga)
     # ax[1].xaxis.set_major_locator(ticker.MultipleLocator(.5))
@@ -298,7 +298,7 @@ if update_pot_vs_gravity:
 
 # %%
 def all_pot_vs_gravity_Laser():
-    fig, ax = plt.subplots(3, 2, num=1,sharex=True, figsize=(figL, 0.8*figA))
+    fig, ax = plt.subplots(3, 2, num=1,sharex=True, figsize=(FIG_L, 0.8*FIG_A))
     fig.supxlabel(r"Aceleração [g]")
     fig.supylabel("\\si{\\micro\\watt}")
     def plot(_ax, y,label):
@@ -329,7 +329,7 @@ def all_pot_vs_gravity_banda_larga():
                            2,
                            num=1,
                            sharex=True,
-                           figsize=(figL, 0.8*figA))
+                           figsize=(FIG_L, 0.8*FIG_A))
     fig.supxlabel(r"Aceleração [g]")
     fig.supylabel("\\si{\\micro\\watt}")
 

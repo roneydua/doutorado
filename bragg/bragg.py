@@ -8,8 +8,8 @@
 '''
 import numpy as np
 import sympy as sp
-figL = 6.29
-figA = (90.0) / 25.4
+FIG_L = 6.29
+FIG_A = (90.0) / 25.4
 
 
 class Bragg(object):
@@ -27,6 +27,18 @@ class Bragg(object):
     wavelength_peak = 1550e-9
 
     def __init__(self, fbg_size, wavelength_peak=1550.0, delta_n=1e-3,delta_span_wavelength=10, diff_of_peak=1,number_of_grating_period_forced=None, wavelength_span=None):
+        '''
+        __init__ Constructor of Bragg class
+
+        Args:
+            fbg_size: Size of fbg.
+            wavelength_peak: Wavelength size on diff_of_peak. Defaults to 1550.0.
+            delta_n: Variation of the refractive index. Defaults to 1e-3.
+            delta_span_wavelength: Span of wavelength to FBG analisys. Defaults to 10.
+            diff_of_peak: another for to give a span of wavelength. Defaults to 1.
+            number_of_grating_period_forced: Force number of period. Defaults to None.
+            wavelength_span: Vector of wavelength to facilite comparisions with another fbg. Defaults to None.
+        '''         
         self.delta_n = delta_n
         """Refraction index perturbation"""
         self.wavelength_peak = 1e-9 * wavelength_peak

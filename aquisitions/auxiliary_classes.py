@@ -62,7 +62,7 @@ class EncoderMikeController:
     ## List with strain
     strain = [0,0,0]
     ## Initial traction element length.
-    initialLength = 0.0
+    initial_length_m = 0.0
     ## Section area
     sectionArea = 0.0
     ## \todo: Implement a methods to find indexOfZeroStrain in a safe way.
@@ -72,10 +72,12 @@ class EncoderMikeController:
     #     sizeInterval(int, optional): Distânce between indexOfZeroStrain in micrometers.
     #     indexOfZeroStrain(float, optional): Initial value to indexOfZeroStrain.
     #
-    def __init__(self, initialLength, indexOfZeroStrain, speed=9600):
-        self.initialLength = float(initialLength)
-        self.indexOfZeroStrain=indexOfZeroStrain
-        self.indexOfHome = indexOfZeroStrain+initialLength
+    def __init__(self, initialLength, indexOfZeroStrain=0, speed=9600):
+        findDevices()
+
+        self.initial_length_m = float(initialLength)
+        # self.indexOfZeroStrain=indexOfZeroStrain
+        self.indexOfHome = 0
         # Change the speed os serial if necessary.
         self.PORT_ENCODER = PORT_ENCODER._replace(speed=speed)
         self.ser = serial.Serial(
@@ -88,6 +90,9 @@ class EncoderMikeController:
         # time.sleep(2)
         self.setPositionMode()
         # time.sleep(2)
+        # self.sendCommand(1,"DH",0)
+        # self.sendCommand(2,"DH",0)
+        # self.sendCommand(3,"DH",0)
 
     ## Set position mode for all axes
     def setPositionMode(self):
@@ -113,7 +118,7 @@ class EncoderMikeController:
     def sendCommand(self, axis, word, n=""):
         self.ser.write((str(axis) + word.upper() + str(n) + "\r").encode())
         # It awaits 100 milliseconds
-        time.sleep(0.1)
+        time.sleep(1)
 
     # """
     # getInformation Function to collect information such as position and speed
@@ -153,7 +158,7 @@ class EncoderMikeController:
     #    position (interger): absolute position
     def goToY(self, position):
         self.setPositionMode()
-        time.sleep(0.1)
+        time.sleep(1)
         self.sendCommand(2, "ma", position)
 
 
@@ -162,7 +167,7 @@ class EncoderMikeController:
     #     position (interger): absolute position
     def goToZ(self, position):
         self.setPositionMode()
-        time.sleep(0.1)
+        time.sleep(.1)
         self.sendCommand(3, "ma", position)
 
 
@@ -218,7 +223,7 @@ class EncoderMikeController:
     # @return:
     #     The position of the  of the axis 3(Z)
     def getPositionZ(self):
-        self.absolutePosition[2] = self.getInformation(3, "TP")
+        self.absolutePosition[2] = float(self.getInformation(3, "TP"))
         return self.absolutePosition[2]
 
     
@@ -244,11 +249,11 @@ class EncoderMikeController:
     # @param
     #     distance (float, optional): The distance to move. Defaults to 3000.
     def putEncoderRelativeToZeroStrainPoint(self, distance=3000):
-        self.goToY(self.indexOfZeroStrain + distance)
+        self.goToY(distance)
 
     def calcStrainY(self):
         self.getPositionY()
-        self.strain[1] = (self.absolutePosition[1] - self.indexOfHome)/self.initialLength
+        self.strain[1] = (self.absolutePosition[1] - self.indexOfHome)/self.initial_length_m
         return self.strain[1]
 
 ## \note: To avoid having to empty the buffer all the time, it was chosen to open the serial connection before readings and close it when using them.
@@ -295,6 +300,7 @@ class Dynamometer:
                 break
             except:# ValueError or IndexError:
                 self.ser.close()
+        return self.strain_value
 
     ## The set_zero function sets  of the dynamometer.
     # @param

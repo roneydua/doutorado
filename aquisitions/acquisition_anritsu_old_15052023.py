@@ -18,7 +18,7 @@ from auxiliaryClasses import Dynamometer
 import pandas as pd
 from pathlib import Path
 mpl.rcParams['figure.dpi'] = 72
-plt.style.use("../../../../programasComuns/roney3.mplstyle")
+plt.style.use("common_functions/roney3.mplstyle")
 
 # for save data
 from datetime import datetime

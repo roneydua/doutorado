@@ -16,10 +16,10 @@ from matplotlib import ticker
 
 from bragg import Bragg
 
-figL = 6.29
-figA = (90.0) / 25.4
+FIG_L = 6.29
+FIG_A = (90.0) / 25.4
 plt.rcParams["figure.dpi"] = 144
-plt.rcParams["figure.figsize"] = (figL, figA)
+plt.rcParams["figure.figsize"] = (FIG_L, FIG_A)
 
 
 def calc_laser(w, center_w, std=0.01):
@@ -79,7 +79,7 @@ def calc_total_pot(bragg1: Bragg,
 # def pot_vs_gravity(deformation_vector, y, plot_label, save_name):
 #     # Plot reflection vs strain
 #     poly_coef = np.polyfit(x=deformation_vector / 9.89, y=y * 1e6, deg=1)
-#     fig, ax = plt.subplots(1, 1, num=1, figsize=(figL, figA * 0.75))
+#     fig, ax = plt.subplots(1, 1, num=1, figsize=(FIG_L, FIG_A * 0.75))
 #     ax.set_title(r'$p(g)[\si{\micro\watt}]=$' +
 #                  '{:2.4f}'.format(poly_coef[0]) + r"$\cdot g+$"
 #                  '{:2.4f}'.format(poly_coef[1]))

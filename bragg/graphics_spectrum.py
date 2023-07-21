@@ -22,12 +22,12 @@ from tol_colors import tol_cset
 # InteractiveShell.ast_node_interactivity = "all"
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 # plt.style.use("default")
-plt.style.use("./../../../../programasComuns/roney3.mplstyle")
+plt.style.use("./common_functions/roney3.mplstyle")
 
 cores = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 
-figL = 6.29
-figA = (90.0) / 25.4
+FIG_L = 6.29
+FIG_A = (90.0) / 25.4
 # End of header
 
 path_locked = "./data/03202023/seismicMass_locked/"
@@ -69,7 +69,7 @@ def dbm2W(_a):
 
 def plot1():
     plt.close(1)
-    fig, ax = plt.subplots(7, 1, num=1, sharex='col', figsize=(figL, 1.75*figA),dpi=576)
+    fig, ax = plt.subplots(7, 1, num=1, sharex='col', figsize=(FIG_L, 1.75*FIG_A),dpi=576)
     ax[0].xaxis.set_major_locator(ticker.MultipleLocator(2))
     def plotGraphics(_ax, _x, _y, _label,line='-'):
         _ax.plot(_x,_y,line,label=_label)
@@ -89,7 +89,7 @@ def plot1():
             ax[-1].set_xlim(1535, 1555)  # type: ignore
 
     plt.legend(ncols=3, loc='center',bbox_to_anchor=(0.5, -.75))
-    fig.supylabel("Potência, " + r"$\si{\decibelm}$")
+    fig.supylabel("Potência, " + r"$\si{\dbm}$")
 
     # ax[row,0].set_ylabel(r'Potência,$\si{\decibel m}$')
     plt.savefig("./../../images/acquisition_dbm.pdf", format="pdf",dpi=576)
@@ -104,7 +104,7 @@ def plot_tap_correction_test(normalized=False):
                            1,
                            num=2,
                            sharex='col',
-                           figsize=(figL, 1.75 * figA),
+                           figsize=(FIG_L, 1.75 * FIG_A),
                            dpi=144)
     ax[0].xaxis.set_major_locator(ticker.MultipleLocator(2))
     def plotGraphics(_ax, _x, _y, _label, _name, line='-'):
@@ -160,7 +160,7 @@ def plot_tap_correction(normalized=False):
                            1,
                            num=2,
                            sharex='col',
-                           figsize=(figL, 1.75 * figA),
+                           figsize=(FIG_L, 1.75 * FIG_A),
                            dpi=144)
     ax[0].xaxis.set_major_locator(ticker.MultipleLocator(2))
 

@@ -1,0 +1,5 @@
+{
+    "python.linting.enabled": false,
+    "python.analysis.extraPaths": ["${workspaceFolder}/"],
+    "pylint.importStrategy": "fromEnvironment"
+}

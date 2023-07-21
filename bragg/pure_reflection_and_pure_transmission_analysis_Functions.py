@@ -22,9 +22,9 @@ my_colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 # plt.style.use("default")
 from bragg import Bragg
 
-plt.style.use("./../../../../programasComuns/roney3.mplstyle")
-figL = 6.29
-figA = 1.5 * (90.0) / 25.4
+plt.style.use("./common_functions/roney3.mplstyle")
+FIG_L = 6.29
+FIG_A = 1.5 * (90.0) / 25.4
 
 
 class InterrogationClass(object):
@@ -75,7 +75,7 @@ class InterrogationClass(object):
         """Vector of pot_photodetector with respect of @self.deformation_vector"""
 
     def interrogation(self, deformation=0.0):
-        fig, ax = plt.subplots(2, 1, sharex=False, figsize=(figL, figA))
+        fig, ax = plt.subplots(2, 1, sharex=False, figsize=(FIG_L, FIG_A))
         ax[0].xaxis.set_major_locator(ticker.MultipleLocator(1))
         ax[0].set_ylabel(r'Reflectivity')
         ax[0].set_xlabel('$\\lambda, \\si{\\nm}$')
@@ -160,7 +160,7 @@ class InterrogationClass(object):
 #                                                       self.laser)
 
 #     def transmission(self, deformation=0.0):
-#         fig, ax = plt.subplots(2, 1, sharex=False, figsize=(figL, figA))
+#         fig, ax = plt.subplots(2, 1, sharex=False, figsize=(FIG_L, FIG_A))
 #         ax[0].xaxis.set_major_locator(ticker.MultipleLocator(1))
 #         ax[0].set_ylabel(r'Refletividade')
 #         ax[0].set_xlabel('$\\lambda, \\si{\\nm}$')
@@ -206,7 +206,7 @@ class InterrogationClass(object):
 #         self.laser = laser
 
 #     def reflection(self, deformation=0.0):
-#         fig, ax = plt.subplots(2, 1, sharex=True, figsize=(figL, figA))
+#         fig, ax = plt.subplots(2, 1, sharex=True, figsize=(FIG_L, FIG_A))
 #         ax[0].xaxis.set_major_locator(ticker.MultipleLocator(1))
 #         ax[0].set_ylabel(r'Refletividade')
 #         ax[1].set_ylabel(r'\si{\milli\watt\per\meter}')
@@ -245,7 +245,7 @@ class InterrogationClass(object):
 #         self.laser = laser
 
 #     def reflection_reflection(self, deformation=0.0):
-#         fig, ax = plt.subplots(2, 1, sharex=True, figsize=(figL, figA))
+#         fig, ax = plt.subplots(2, 1, sharex=True, figsize=(FIG_L, FIG_A))
 #         ax[0].xaxis.set_major_locator(ticker.MultipleLocator(1))
 #         ax[0].set_ylabel(r'Refletividade')
 #         ax[1].set_ylabel(r'\si{\milli\watt\per\meter}')
@@ -302,7 +302,7 @@ class InterrogationClass(object):
 #         self.laser = laser
 
 #     def transmission_transmission(self, deformation=0.0):
-#         fig, ax = plt.subplots(2, 1, sharex=True, figsize=(figL, figA))
+#         fig, ax = plt.subplots(2, 1, sharex=True, figsize=(FIG_L, FIG_A))
 #         ax[0].xaxis.set_major_locator(ticker.MultipleLocator(1))
 
 #         ax[0].set_ylabel(r'Refletividade')
@@ -360,7 +360,7 @@ class InterrogationClass(object):
 #         self.laser = laser
 
 #     def reflection_transmission(self, deformation=0.0):
-#         fig, ax = plt.subplots(2, 1, sharex=True, figsize=(figL, figA))
+#         fig, ax = plt.subplots(2, 1, sharex=True, figsize=(FIG_L, FIG_A))
 #         ax[0].xaxis.set_major_locator(ticker.MultipleLocator(1))
 
 #         ax[0].set_ylabel(r'Refletividade')
@@ -419,7 +419,7 @@ class InterrogationClass(object):
 #         self.laser = laser
 
 #     def transmission_reflection(self, deformation=0.0):
-#         fig, ax = plt.subplots(2, 1, sharex=True, figsize=(figL, figA))
+#         fig, ax = plt.subplots(2, 1, sharex=True, figsize=(FIG_L, FIG_A))
 #         ax[0].xaxis.set_major_locator(ticker.MultipleLocator(1))
 
 #         ax[0].set_ylabel(r'Refletividade')

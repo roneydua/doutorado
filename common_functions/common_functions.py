@@ -14,7 +14,6 @@ import numpy as np
 def dbm_mW(dbm:float or np.ndarray, mW=True):
     '''
     dbm2mW transform a dbm to mW or Watt
-
     Args:
         dbm: value to convert to mw. Can be float or numpy array.
         mw: _description_. Defaults to True.
@@ -31,7 +30,6 @@ def dbm_mW(dbm:float or np.ndarray, mW=True):
 def mW_dbm(mW: float or np.ndarray):
     '''
     dbm2mW transform a dbm to mW or Watt
-
     Args:
         dbm: value to convert to mw. Can be float or numpy array.
         mw: _description_. Defaults to True.

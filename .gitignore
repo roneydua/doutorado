@@ -1,1 +1,6 @@
 /modeling/data
+/docs
+modeling/__pycache__
+bragg/__pycache__/bragg.cpython-310.pyc
+common_functions/__pycache__
+reflectivity_analisys/__pycache__/graphics_optical_mechanical_identification.cpython-310.pyc

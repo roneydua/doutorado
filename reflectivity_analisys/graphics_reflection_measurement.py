@@ -1,62 +1,58 @@
-# type: ignore
 import locale
 from pathlib import Path
-from pydoc import apropos
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from ipywidgets import fixed, interactive
-from bragg import Bragg
+
+from bragg.bragg import Bragg
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
-plt.style.use("./../../../../programasComuns/roney3.mplstyle")
+plt.style.use("./common_functions/roney3.mplstyle")
 
 my_color = plt.rcParams["axes.prop_cycle"].by_key()["color"]
-figL = 6.29
-figA = (90.0) / 25.4
+FIG_L = 6.29
+FIG_A = (90.0) / 25.4
 
-max_deformation = 3.4265e-5
 
 a = pd.read_csv(
-    Path('../../../../experimentos/24042023/a_reflection_042423__130528.csv'))
+    Path('../experimentos/24042023/a_reflection_042423__130528.csv'))
 a_4_percent = pd.read_csv(
     Path(
-        '../../../../experimentos/24042023/a_reflection_4_percent_042423__130752.csv'
-    ))
+        '../experimentos/24042023/a_reflection_4_percent_042423__130752.csv'))
 
 b = pd.read_csv(
-    Path('../../../../experimentos/24042023/b_reflection_042423__124322.csv'))
+    Path('../experimentos/24042023/b_reflection_042423__124322.csv'))
 b_4_percent = pd.read_csv(
     Path(
-        '../../../../experimentos/24042023/b_reflection_4_percent_042423__124714.csv'
+        '../experimentos/24042023/b_reflection_4_percent_042423__124714.csv'
     ))
 
 c = pd.read_csv(
-    Path('../../../../experimentos/24042023/c_reflection_042423__131535.csv'))
+    Path('../experimentos/24042023/c_reflection_042423__131535.csv'))
 c_4_percent = pd.read_csv(
     Path(
-        '../../../../experimentos/24042023/c_reflection_4_percent_042423__131725.csv'
+        '../experimentos/24042023/c_reflection_4_percent_042423__131725.csv'
     ))
 
 d = pd.read_csv(
-    Path('../../../../experimentos/24042023/d_reflection_042423_133240.csv'))
+    Path('../experimentos/24042023/d_reflection_042423_133240.csv'))
 d_4_percent = pd.read_csv(
     Path(
-        '../../../../experimentos/24042023/d_reflection_4_percent_042423__133611.csv'
+        '../experimentos/24042023/d_reflection_4_percent_042423__133611.csv'
     ))
 e = pd.read_csv(
-    Path('../../../../experimentos/24042023/e_reflection_042023__142133.csv'))
+    Path('../experimentos/24042023/e_reflection_042023__142133.csv'))
 e_4_percent = pd.read_csv(
     Path(
-        '../../../../experimentos/24042023/e_reflection_4_percent_042023__142133.csv'
+        '../experimentos/24042023/e_reflection_4_percent_042023__142133.csv'
     ))
 
 f = pd.read_csv(
-    Path('../../../../experimentos/24042023/f_reflection_042423__140137.csv'))
+    Path('../experimentos/24042023/f_reflection_042423__140137.csv'))
 f_4_percent = pd.read_csv(
     Path(
-        '../../../../experimentos/24042023/f_reflection_4_percent_042423__140332.csv'
+        '../experimentos/24042023/f_reflection_4_percent_042423__140332.csv'
     ))
 
 r = [a, b, c, d, e, f]
@@ -71,11 +67,11 @@ leg = [
 ]
 
 laser = pd.read_csv(
-    Path('../../../../experimentos/25042023/laser_1549042523__131644.csv'))
+    Path('../experimentos/25042023/laser_1549042523__131644.csv'))
 
 
 def calc_reflectivity(_r, _ref):
-    return 3.3735943356934604 / (10**((_ref - _r) * 0.1 - 1.0))
+    return 3.3735943356934604 / (10.0**((_ref - _r) * 0.1) - 1.0)
 
 
 def plot_reflection_dbm():
@@ -83,7 +79,7 @@ def plot_reflection_dbm():
                            1,
                            num=1,
                            sharex=True,
-                           figsize=(figL, figA * 1.25))
+                           figsize=(FIG_L, FIG_A * 1.25))
     for lin in range(6):
         ax[lin].plot(r[lin]['wave_length'], r[lin]['power'])
         ax[lin].plot(r_ref[lin]['wave_length'], r_ref[lin]['power'])
@@ -96,23 +92,23 @@ def plot_reflection_dbm():
                  ncol=2,
                  loc='upper center',
                  bbox_to_anchor=(.5, 1.5))
-    # plt.savefig("../../images/reflection_dbm.pdf", format="pdf")
+    # plt.savefig("../images/reflection_dbm.pdf", format="pdf")
     # plt.close(fig=1)
-    plt.savefig("../../images/reflection_dbm.svg", format="svg")
+    plt.savefig("../images/reflection_dbm.svg", format="svg")
     plt.close(fig=1)
 
 
 
 def reflectivity_plots():
     # bragg.r0.max()
-    # fig.clear()
+    # fig.clear(3)
     _laser_peak = 1549.3
     fig, ax = plt.subplots(1,
                            3,
                            num=3,
                            sharey=True,
                            sharex=True,
-                           figsize=(figL, 0.8*figA))
+                           figsize=(FIG_L, 0.8*FIG_A))
 
     class linearization_data():
 
@@ -133,7 +129,7 @@ def reflectivity_plots():
 
     def plotax(axis_number, lin,color_number=0):
 
-        reflectivity = calc_reflectivity(r[lin]['power'], r_ref[lin]['power'])
+        reflectivity = calc_reflectivity(_r=r[lin]['power'], _ref= r_ref[lin]['power'])
         ##
         icf = np.where(r_ref[lin].wave_length >= _laser_peak)[0][0]
         '''Index center of fitting'''
@@ -182,13 +178,13 @@ def reflectivity_plots():
     ax[0].legend(ncol=1)
     ax[1].legend(ncol=1)
     ax[2].legend(ncol=1)
-    ax[0].set_ylim(bottom=0, top=35)
+    ax[0].set_ylim(bottom=0, top=100)
     ax[0].set_xlim(1539, 1552)
     fig.supxlabel(r'$\lambda, \si{\nm}$')
     fig.supylabel(r'Refletividade, \%')
-    plt.savefig("../../images/reflectivity_plots.pdf", format="pdf")
+    plt.savefig("../images/reflectivity_plots.pdf", format="pdf")
     approx.df.to_csv(
-        "../../../../experimentos/24042023/reflectivity_approximations_and_peaks.csv"
+        "../experimentos/24042023/reflectivity_approximations_and_peaks.csv"
     )
     plt.close(fig=3)
     p = lambda lin: approx.df.r_a[lin] * _laser_peak + approx.df.r_l[lin]
@@ -206,13 +202,13 @@ reflectivity_plots()
 
 def transmissivity_plots():
     # bragg.r0.max()
-    fig.clear()
+    # fig.clear()
     fig, ax = plt.subplots(1,
                            3,
                            num=3,
                            sharey=True,
                            sharex=True,
-                           figsize=(figL, figA))
+                           figsize=(FIG_L, FIG_A))
 
     class linearization_data():
 
@@ -272,9 +268,9 @@ def transmissivity_plots():
     ax[0].set_xlim(1539, 1552)
     fig.supxlabel(r'$\lambda, \si{\nm}$')
     fig.supylabel(r'Transmissão, \%')
-    plt.savefig("../../images/transmission_plots.pdf", format="pdf")
+    plt.savefig("../images/transmission_plots.pdf", format="pdf")
     approx.df.to_csv(
-        "../../../../experimentos/24042023/transmission_approximations_and_peaks.csv"
+        "../../experimentos/24042023/transmission_approximations_and_peaks.csv"
     )
     plt.close(fig=3)
     p = lambda lin: approx.df.t_a[lin] * 1549.3 + approx.df.t_l[lin]
