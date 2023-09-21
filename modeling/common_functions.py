@@ -22,19 +22,6 @@ plt.rcParams["figure.dpi"] = 144
 plt.rcParams["figure.figsize"] = (FIG_L, FIG_A)
 
 
-def calc_laser(w, center_w, std=0.01):
-    '''
-    calc_laser make a laser with Gaussian profile.
-    Args:
-        w: wavelength vector 
-        center_w: wavelength peak
-        std: Standart deviation of Gaussian profile. Defaults to 0.1*1e-9.
-    Returns:
-        A vector of laser
-    '''
-    return np.exp(-(w - center_w)**2 /
-                  (2.0 * std**2)) / (std * np.sqrt(2.0 * np.pi))
-
 # [markdown]
 # All function with interrogations
 

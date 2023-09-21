@@ -118,7 +118,6 @@ def generate_toy_date():
     mat_a_T_mat_a = mat_a.T @ mat_a
     eigen_values, eigen_vectors = np.linalg.eig(mat_a_T_mat_a)
     eigen_vector_min = eigen_vectors[:, np.argmin(eigen_values)]
-    eigen_vector_min / min(eigen_values)
 
 
 def calc_optical_mechanical():
