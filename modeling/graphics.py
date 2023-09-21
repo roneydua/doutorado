@@ -9,7 +9,8 @@ import numpy as np
 from IPython.core.interactiveshell import InteractiveShell
 from numpy import abs
 
-import funcoesQuaternion as fq
+import common_functions.funcoesQuaternion as fq
+import common_functions.QuatSymbolic as qs
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 plt.style.use("common_functions/roney3.mplstyle")
