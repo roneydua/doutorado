@@ -46,7 +46,7 @@ def matrixQ(quat, right=False):
     Q[0, 1] = -quat[2]
     Q[0, 2] = -quat[3]
     if right:
-        Q[1:, :] = quat[0] * np.identity(3) - screwMatrix(quat)
+        Q[1:, :] = quat[0] * np.eye(3) - screwMatrix(quat)
     else:
         Q[1:, :] = quat[0] * np.eye(3) + screwMatrix(quat)
     return Q
@@ -66,9 +66,9 @@ def matrixS(quat, right=False):
     """
     S = np.zeros((4, 4))
     if right:
-        S[:, 1:] = matrixQ(quat)
-    else:
         S[:, 1:] = matrixQ(quat, right=True)
+    else:
+        S[:, 1:] = matrixQ(quat)
 
     S[:, 0] = quat
     return S
