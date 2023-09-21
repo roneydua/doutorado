@@ -4,3 +4,65 @@ modeling/__pycache__
 bragg/__pycache__/bragg.cpython-310.pyc
 common_functions/__pycache__
 reflectivity_analisys/__pycache__/graphics_optical_mechanical_identification.cpython-310.pyc
+fbg_production/Laser_caracterization_LabVIEW_v20/Laser caracterization.aliases
+fbg_production/Laser_caracterization_LabVIEW_v20/Laser caracterization.lvlps
+fbg_production/Laser_caracterization_LabVIEW_v20/Laser caracterization.lvproj
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 Average Average.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 Average On Off.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 Center Auto Pkc.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 Center Center.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 Center Peak.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 Data Format Select Data.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 Data Separator Select Data.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 Device Buzzer.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 Halfwidth Data.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 Header Out Data.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 Measure.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 Mode Resolution.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 Peakserch Data.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 Ref Level Auto.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 Ref Level Laser Led.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 Ref Level Ref Lebel.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 Span Auto.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 Span Span.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 Spectral Width Spec Width.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 SRQ Signal Control 1 Data.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 SRQ Signal Control 1.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 SRQ Signal Control 2 Data.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 SRQ Signal Control 2.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 Wavelike Data_backslash_n.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/AVQ8347_lib/AVQ8347 Wavelike Data.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/VIs/Config Spectrometer.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/VIs/End Configuration.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/VIs/End Sound.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/VIs/hora min seg.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/VIs/Read Spectrum Continuously.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/VIs/Read Spectrum.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/VIs/save_metadata.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/VIs/Spectrum file name.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/VIs/Start Configuration.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/VIs/Wait for spectrometer.vi
+fbg_production/Laser_caracterization_LabVIEW_v20/data/data0.lvm
+fbg_production/Laser_caracterization_LabVIEW_v20/data/data1.lvm
+.vscode/ipython/command.py
+aquisitions/acquisition_anritsu.py
+aquisitions/advantest_Q8347.py
+aquisitions/optical_mechanical_identification.py
+aquisitions/simple_gui_test.py
+aquisitions/dataTemp/fbg_1_dehydrogenated.png
+aquisitions/dataTemp/fbg_1_dehydrogenated.txt
+aquisitions/dataTemp/fbg_2.png
+aquisitions/dataTemp/fbg_2.txt
+aquisitions/dataTemp/graphic_dehidrogenation.py
+aquisitions/dataTemp/source_dehydrogenated.png
+aquisitions/dataTemp/source_dehydrogenated.txt
+aquisitions/dataTemp/source.png
+aquisitions/dataTemp/source.txt
+aquisitions/dataTemp/interrogation_test_20230918/fbg_1.png
+aquisitions/dataTemp/interrogation_test_20230918/fbg_1.txt
+aquisitions/dataTemp/interrogation_test_20230918/fbg_2.png
+aquisitions/dataTemp/interrogation_test_20230918/fbg_2.txt
+teste.py
+teste.jl
+test_data
+temp.hdf5

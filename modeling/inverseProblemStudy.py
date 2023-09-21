@@ -1,5 +1,5 @@
 import sympy as sp
-from  QuatSymbolic import QuaternionSymbolic
+from  common_functions.QuatSymbolic import QuaternionSymbolic
 
 q = QuaternionSymbolic()
 
@@ -23,7 +23,10 @@ q.Q().T @ q.Q() @ q.quatRot(normalized=1)
 df_dq = sp.Matrix([q.quat[0]* m.T - m.T * q.screw(),
                    (q.vec().T*m)[0,0]*sp.eye(3)+m*q.vec().T-q.vec()*m.T+q.quat[0]*screw(m)])
 
-t = q.Q().T @ df_dq
+q.quatRot(normalized=True)
+
+t = q.Q().T @ df_dq@q.quatRot(normalized=True).T
+
 
 I = sp.diag(sp.symbols(r'I_x'), sp.symbols(r'I_x'), sp.symbols(r'I_x'))**-1
 

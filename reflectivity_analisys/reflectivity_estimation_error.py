@@ -12,7 +12,7 @@ import locale
 import matplotlib.pyplot as plt
 import numpy as np
 
-from common_functions.common_functions import mW_dbm
+from common_functions.generic_functions import mW_dbm
 
 # InteractiveShell.ast_node_interactivity = "all"
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")

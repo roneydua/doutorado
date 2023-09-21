@@ -16,7 +16,7 @@ from IPython.display import display
 from ipywidgets import fixed, interactive
 from matplotlib import ticker
 
-from bragg import Bragg, OpticalCoupler
+from bragg.bragg import Bragg, OpticalCoupler
 
 from IPython.core.interactiveshell import InteractiveShell
 from ipywidgets import fixed, interactive
@@ -37,6 +37,9 @@ bragg = Bragg(fbg_size=6.5e-3,
               wavelength_peak=l_peak,
               delta_span_wavelength=delta_l,
               diff_of_peak=1)
+
+
+
 
 # plt.plot(bragg.wavelength_span_nm, bragg.r0)
 # bragg.r0.max()
@@ -278,3 +281,5 @@ def graphicsAnimation(_e=0):
 # plot_drawFig6_spectres()
 plot_bragg_spectrum()
 # plot_bragg_spectrum()
+
+
