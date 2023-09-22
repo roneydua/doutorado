@@ -10,7 +10,6 @@ from numpy import cos, sin
 
 def screwMatrix(v):
     """Computa a matriz anti-simetrica a partir do v.
-
     Parameters
     ----------
     @param vector or quaternio.
