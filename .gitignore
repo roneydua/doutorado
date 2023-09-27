@@ -66,3 +66,7 @@ teste.py
 teste.jl
 test_data
 temp.hdf5
+modeling/modeling_fast_test.py
+lvm_read
+test.hdf5
+phd_data.hdf5
