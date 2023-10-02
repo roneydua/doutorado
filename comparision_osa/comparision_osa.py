@@ -23,7 +23,7 @@ FIG_A = (90.0) / 25.4
 # End of header
 
 
-f = h5py.File('../data/phd_data.hdf5')
+f = h5py.File('phd_data.hdf5')
 ff = f['osa_comparision']
 advantest_1_hr = ff['advantest01/high_resolution']
 advantest_1_lr = ff['advantest01/low_resolution']
