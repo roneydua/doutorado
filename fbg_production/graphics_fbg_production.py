@@ -7,6 +7,7 @@
 @Contact :   roneyddasilva@gmail.com
 '''
 
+# from common_functions.generic_functions import reflectivity_transmition
 import locale
 import os
 
@@ -26,7 +27,6 @@ locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 # plt.style.use("default")
 plt.style.use("common_functions/roney3.mplstyle")
 my_colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
-from common_functions.generic_functions import reflectivity_transmition
 
 FIG_L = 6.29
 FIG_A = (90.0) / 25.4
@@ -44,9 +44,6 @@ def fix_time(t):
     return t_fixed
 
 
-
-
-
 def plot_all_fbgs():
     '''
     plot_all_fbgs Graphic Plot before and after after_dehydrogenation
@@ -55,21 +52,19 @@ def plot_all_fbgs():
     # fig2.clear()
     fig, ax = plt.subplots(1, 1, num=2, sharex=True, figsize=(FIG_L, FIG_A))
     # fig, ax = plt.subplots(num=1,figsize=(FIG_L, FIG_A),subplot_kw={"projection":"3d"})
-    f = h5py.File("./../data/phd_data.hdf5",'r')
+    f = h5py.File("./../data/phd_data.hdf5", 'r')
     r_before = f['fbg_production/test1/fbg5/r/315'][...]
     wavelength_before = f['fbg_production/test1/fbg5/wavelength/315'][...]
     r_after = f['fbg_production/test1/after_dehydrogenation/fbg5/r'][...]
     wavelength_after = f['fbg_production/test1/after_dehydrogenation/fbg5/wavelength'][...]
-    ax.plot(1e9*wavelength_before,r_before,label='Hidrogenada')
+    ax.plot(1e9*wavelength_before, r_before, label='Hidrogenada')
     ax.plot(1e9*wavelength_after, r_after, label='Desidrogenada')
     ax.set_ylabel("Refletividade")
     ax.set_xlabel(r"$\lambda[\unit{\nm}]$")
-    ax.set_xlim(left=1550,right=1560)
-    ax.set_ylim(0,0.8)
+    ax.set_xlim(left=1550, right=1560)
+    ax.set_ylim(0, 0.8)
     ax.legend()
     # ax.legend(ncol=2)
-
-
 
 
 # f = h5py.File('./../data/phd_data.hdf5', 'r')
@@ -119,11 +114,6 @@ def plot_all_fbgs():
 # f.close()
 
 
-
-
-
-
-
 def analysis_laser_fbg():
     f = h5py.File('./../data/phd_data.hdf5', 'r')
     # fbg_power_1 = f['fbg_production/test2/fbg_1']
@@ -132,36 +122,63 @@ def analysis_laser_fbg():
     fbg_power_4 = f['fbg_production/test2/fbg_4']
     fbg_power_5 = f['fbg_production/test2/fbg_5']
 
-    ## Dehydrogenated
+    # Dehydrogenated
     fbg_power_2_dehydrogenated = f['fbg_production/test2/fbg_2/after_dehydrogenation']
     fbg_power_5_dehydrogenated = f['fbg_production/test2/fbg_5/after_dehydrogenation']
 
     laser_power = f['osa_comparision/advantest02/high_resolution/']
-    
+
     plt.cla()
     # plt.plot(fbg_power_1['wavelength'][:],
-            #  fbg_power_1['r'][:,-1],label='Fbg_1')
+    #  fbg_power_1['r'][:,-1],label='Fbg_1')
     plt.plot(fbg_power_2['wavelength'][:],
-             fbg_power_2['r'][:,-1],label='Fbg_2')
+             fbg_power_2['r'][:, -1], label='Fbg_2')
     plt.plot(fbg_power_3['wavelength'][:],
-             fbg_power_3['r'][:,-1],label='Fbg_3')
+             fbg_power_3['r'][:, -1], label='Fbg_3')
     plt.plot(fbg_power_4['wavelength'][:],
-             fbg_power_4['r'][:,-1],label='Fbg_4')
+             fbg_power_4['r'][:, -1], label='Fbg_4')
     plt.plot(fbg_power_5['wavelength'][:],
-             fbg_power_5['r'][:,-1],label='Fbg_5')
-
-
+             fbg_power_5['r'][:, -1], label='Fbg_5')
 
     plt.plot(fbg_power_2_dehydrogenated['wavelength'][:],
              fbg_power_2_dehydrogenated['r'][:], label='Fbg_2 Desidrogenada')
     plt.plot(fbg_power_5_dehydrogenated['wavelength'][:],
              fbg_power_5_dehydrogenated['r'][:], label='Fbg_5 Desidrogenada')
-    
+
     # plt.plot(fbg_power_after_dehydrogenation['wavelength'][:],
     #          fbg_power_after_dehydrogenation['r'][:],label='Desidrogenada')
     # plt.plot(fbg_power['wavelength'][:], fbg_power['r'][:,8],label='Hidrogenada')
     plt.plot(laser_power['wavelength'][:],
-             laser_power['power_dbm'][:]/laser_power['power_dbm'][:].max(),label='Laser')
-    plt.ylim(0,1)
+             laser_power['power_dbm'][:]/laser_power['power_dbm'][:].max(), label='Laser')
+    plt.ylim(0, 1)
     plt.legend()
-    plt.xlim(1545e-9,1555e-9)
+    plt.xlim(1545e-9, 1555e-9)
+
+
+def production_20230921():
+    number = ['4', '5']
+    _f = h5py.File('phd_data.hdf5', 'r')
+    ff = _f['fbg_production/test3']
+    laser_wavelength = 1549.8
+    for i in range(2):
+        fig, ax = plt.subplots(1, 1, num=1, sharey=True, figsize=(FIG_L/2., FIG_A))
+        ax.set_ylim(0, 1)
+        t0 = 20
+        delta_t = 20
+        ax.set_xlim(1540, 1560)
+        
+        ax.vlines(laser_wavelength,ymin=0,ymax=1,label=r'Laser ($1549.8\si{\nm}$)',color='k')
+        for t in range(3, ff['fbg'+number[i]]['reflectivity'].shape[1], 2):
+            ax.plot(1e9*ff['fbg'+number[i]]['wavelength'][:], ff['fbg'+number[i]]
+                       ['reflectivity'][:, t], label=r't='+str(t0)+r'\si{\second}')
+            t0 += delta_t
+        ax.legend()
+        
+        ax.set_xlabel(r'$\lambda[\si{\nm}]$')
+        ax.set_ylabel(r'Refletividade')
+        plt.savefig("./../dissertacao/images/fbgs_20230921_"+number[i]+".pdf", format="pdf")
+        plt.close('all')
+    _f.close()
+
+
+production_20230921()
