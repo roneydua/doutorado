@@ -18,7 +18,7 @@ plt.style.use("common_functions/roney3.mplstyle")
 my_colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 FIG_L = 6.29
 
-def plot_production_one_collum(date:str):
+def plot_production_one_collumn(date:str):
     f = h5py.File('production_files.hdf5','r')
     ff = f['fbg_production/'+date]
     fbg_keys = list(ff.keys())
@@ -54,7 +54,7 @@ def loop_graphics():
     ff = f['fbg_production/']
     fbg_keys = list(ff.keys())
     for i in fbg_keys:
-        plot_production_one_collum(date=i)
+        plot_production_one_collumn(date=i)
     f.close()
     
 
