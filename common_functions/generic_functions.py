@@ -67,8 +67,14 @@ def find_index_of_x_span(min:float, max:float, x:np.array):
     Returns:
         index
     '''
-    index_min = np.where(x>min)[0][0]
-    index_max = np.where(x>max)[0][0]
+    try:
+        index_min = np.where(x>min)[0][0]
+    except:
+        index_min = 0
+    try:
+        index_max = np.where(x>max)[0][0]
+    except:
+        index_max = len(x)-1
     return index_min, index_max
 
 
