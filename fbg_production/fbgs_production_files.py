@@ -268,11 +268,15 @@ def put_data_production_on_hdf(date):
     put_data_production_on_hdf Function to append csv files collected on production to a hdf file. 
     '''
     FOLDER = "../data/danteAlex/"+date+"/"
-    for i in [2, 3, 4, 5]:
-        file = FOLDER+"FBG#"+str(i)+".txt"
+    f = h5py.File("production_files.hdf5", "a")
+    _files = os.popen('ls '+FOLDER+"FBG**.txt").read().split('\n')[:-1]
+    # _files = os.popen('du -a '+folder+"/*.lvm").read().split('\n')[:-1]
+    files = natsort.natsorted(_files)
+    for j in files:
+        i = j.split("#")[1].split('.txt')[0]
+        file = FOLDER+"FBG#"+i+".txt"
         data_pd = pd.read_csv(file, sep="\t")
-        f = h5py.File("production_files.hdf5", "a")
-        ff = f.require_group("fbg_production/"+date+"/fbg"+str(i))
+        ff = f.require_group("fbg_production/"+date+"/fbg"+i)
         ff["wavelength_m"] = data_pd.iloc[:, 0]
         ff["optical_power_dbm"] = data_pd.iloc[:, 1:]
         refletictivity = np.zeros(ff["optical_power_dbm"].shape)
@@ -280,9 +284,9 @@ def put_data_production_on_hdf(date):
             refletictivity[:, j] = reflectivity_transmition(
                 ff["optical_power_dbm"][:, 0], ff["optical_power_dbm"][:, j])
         ff["reflectivity"] = refletictivity
-        with open(FOLDER+"metadata"+"_FBG#"+str(i)+".txt", errors='ignore') as metadata:
+        with open(FOLDER+"metadata"+"_FBG#"+i+".txt", errors='ignore') as metadata:
             ff.attrs['metadata'] = metadata.readlines()
-        f.close()
+    f.close()
 
 
 # put_data_production_on_hdf_20230807()
@@ -295,3 +299,15 @@ def put_data_production_on_hdf(date):
 # put_data_production_on_hdf_20230912()
 # put_data_production_on_hdf_20230913()
 # put_data_production_on_hdf_20230921()
+
+
+def remove_wrong_data(date='', fbg_number=''):
+    f = h5py.File('production_files.hdf5','a')
+    ff = f['fbg_production/'+date+'/'+fbg_number]
+    a = ff['optical_power_dbm']
+    del ff['optical_power_dbm']
+    ff['optical_power_dbm'] = a[:,:12]
+    a = ff['reflectivity']
+    del ff['reflectivity']
+    ff['reflectivity'] = a[:,:12]
+    f.close()
