@@ -4,7 +4,7 @@ import dill
 import numpy as np
 from tqdm import tqdm
 
-import funcoesQuaternion as fq
+import common_functions.funcoesQuaternion as fq
 from mathModelAccel import AccelModel
 from RK import RungeKutta
 
