@@ -74,11 +74,14 @@ def matrixS(quat, right=False):
 
 
 def MultQuat(r, q, p):
-    """Parameters.
-
-    p, q : quaternion attitude input.
-    r : result of multiplication.
-    """
+    '''MultQuat Parameters.
+    
+    Args:
+    -----
+        r: result of multiplication. r = p x q
+        q: quaternion of attitude
+        p: quaternion of attitude
+    '''
     r[0] = q[0] * p[0] - q[1] * p[1] - q[2] * p[2] - q[3] * p[3]
     r[1] = q[1] * p[0] + q[0] * p[1] - q[3] * p[2] + q[2] * p[3]
     r[2] = q[2] * p[0] + q[3] * p[1] + q[0] * p[2] - q[1] * p[3]
@@ -178,3 +181,22 @@ def expMap(w : np.ndarray,dt: float, tolerance =1e-15):
         expMapArray[0]=cos(w_norm*0.5*dt)
         expMapArray[1:]=w/w_norm * sin(w_norm*0.5*dt)
     return expMapArray
+
+
+def calc_dfdq(q, v):
+    '''
+    calc_dfdq Calculate jacobian of rotated vector
+    Args:
+        q: quanternion rotation
+        v: vector 3x1
+    Returns:
+        Jacobian of rotation vector w.r.t quaterion. 
+        NOTE: This function retunr transpose of Jacobian
+    '''
+    dfdq = np.zeros((4, 3))
+    dfdq[0, :] = q[0] * v.T - v.T @ fq.screwMatrix(q[1:])
+    dfdq[1:, :] = q[1:].T @ v * np.eye(3)
+    dfdq[1:, :] += v.reshape((3, 1)) @ q[1:].reshape((1, 3))
+    dfdq[1:, :] -= q[1:].reshape((3, 1)) @ v.reshape((1, 3))
+    dfdq[1:, :] += q[0] * fq.screwMatrix(v)
+    return 2.0 * dfdq
