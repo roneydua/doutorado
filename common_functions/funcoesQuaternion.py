@@ -194,9 +194,9 @@ def calc_dfdq(q, v):
         NOTE: This function retunr transpose of Jacobian
     '''
     dfdq = np.zeros((4, 3))
-    dfdq[0, :] = q[0] * v.T - v.T @ fq.screwMatrix(q[1:])
+    dfdq[0, :] = q[0] * v.T - v.T @ screwMatrix(q[1:])
     dfdq[1:, :] = q[1:].T @ v * np.eye(3)
     dfdq[1:, :] += v.reshape((3, 1)) @ q[1:].reshape((1, 3))
     dfdq[1:, :] -= q[1:].reshape((3, 1)) @ v.reshape((1, 3))
-    dfdq[1:, :] += q[0] * fq.screwMatrix(v)
+    dfdq[1:, :] += q[0] * screwMatrix(v)
     return 2.0 * dfdq
