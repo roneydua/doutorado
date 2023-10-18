@@ -8,7 +8,7 @@ import numpy as np
 from numpy import cos, sin
 
 
-def screwMatrix(v):
+def screw_matrix(v):
     """Computa a matriz anti-simetrica a partir do v.
     Parameters
     ----------
@@ -45,9 +45,9 @@ def matrixQ(quat, right=False):
     Q[0, 1] = -quat[2]
     Q[0, 2] = -quat[3]
     if right:
-        Q[1:, :] = quat[0] * np.eye(3) - screwMatrix(quat)
+        Q[1:, :] = quat[0] * np.eye(3) - screw_matrix(quat)
     else:
-        Q[1:, :] = quat[0] * np.eye(3) + screwMatrix(quat)
+        Q[1:, :] = quat[0] * np.eye(3) + screw_matrix(quat)
     return Q
 
 
@@ -73,20 +73,22 @@ def matrixS(quat, right=False):
     return S
 
 
-def MultQuat(r, q, p):
+def mult_quat(p:np.ndarray, q:np.ndarray):
     '''MultQuat Parameters.
-    
     Args:
     -----
-        r: result of multiplication. r = p x q
         q: quaternion of attitude
         p: quaternion of attitude
+    Returns:
+    -------
+        r: result of multiplication. r = p x q
     '''
+    r = np.array([0.,0.,0.,0.])
     r[0] = q[0] * p[0] - q[1] * p[1] - q[2] * p[2] - q[3] * p[3]
     r[1] = q[1] * p[0] + q[0] * p[1] - q[3] * p[2] + q[2] * p[3]
     r[2] = q[2] * p[0] + q[3] * p[1] + q[0] * p[2] - q[1] * p[3]
     r[3] = q[3] * p[0] - q[2] * p[1] + q[1] * p[2] + q[0] * p[3]
-
+    return r
 
 def conj(q):
     """Retorna o conjugado do quaternion q.
@@ -139,7 +141,7 @@ def rotationMatrix(q):
     Matrix de rotacao
     """
     return (np.eye(3) * (q[0] * q[0] - np.dot(q[1:], q[1:]))
-            + 2.0 * q[0] * screwMatrix(q)
+            + 2.0 * q[0] * screw_matrix(q)
             + 2.0 * q[1:].reshape(3, 1) @ q[1:].reshape(1, 3))
 
 
@@ -194,9 +196,9 @@ def calc_dfdq(q, v):
         NOTE: This function retunr transpose of Jacobian
     '''
     dfdq = np.zeros((4, 3))
-    dfdq[0, :] = q[0] * v.T - v.T @ screwMatrix(q[1:])
+    dfdq[0, :] = q[0] * v.T - v.T @ screw_matrix(q[1:])
     dfdq[1:, :] = q[1:].T @ v * np.eye(3)
     dfdq[1:, :] += v.reshape((3, 1)) @ q[1:].reshape((1, 3))
     dfdq[1:, :] -= q[1:].reshape((3, 1)) @ v.reshape((1, 3))
-    dfdq[1:, :] += q[0] * screwMatrix(v)
+    dfdq[1:, :] += q[0] * screw_matrix(v)
     return 2.0 * dfdq
