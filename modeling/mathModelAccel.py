@@ -277,7 +277,7 @@ class AccelModelInertialFrame(object):
             fibers_with_info: Defaults to np.arange(1, 13).
             inverse_problem_full: Defaults to True.
             damper_for_computation_simulations: Defaults to 0.0.
-        '''        
+        '''
         self.damper_for_computation_simulations = damper_for_computation_simulations
 
         self.fiber_diameter = fiber_diameter
@@ -376,7 +376,6 @@ class AccelModelInertialFrame(object):
         self.update_inertial_coil_connections()
         self.update_f_vector()
 
-
     def dd_x_forced_body_state(self, d_x, u):
         '''
         dd_x_forced_body_state calc second order of model for numerical integration.
@@ -422,7 +421,7 @@ class AccelModelInertialFrame(object):
             # sum for compute translational moviments
             sum_f_hat_dell += f_hat_dell[:, i]
             sum_f_hat_dell_dfdq_M += fq.calc_dfdq(qm,
-                                               self.m_M[i, :]) @ f_hat_dell[:, i]
+                                                  self.m_M[i, :]) @ f_hat_dell[:, i]
             # NOTE: important signal of dfdq
             # sum_f_hat_dell_dfdq_B = -calc_dfdq(qb, self.b_B[i, :]) @ f_hat_dell[:, i]
         # calculate dd_rm
@@ -452,27 +451,46 @@ class AccelModelInertialFrame(object):
             0.5*self.k * Qm.T @ sum_f_hat_dell_dfdq_M)
         return dd_x
 
-from dataclasses import dataclass
 
-# class inverse_problem(AccelModelInertialFrame):
-#     """docstring for inverse_problem."""
-#     def __init__(self, fibers_with_info:np.ndarray,recover_angular_accel=False):
-#         '''
-#         __init__ Contructor of inverse_problem. 
-#         Args:
-#             fibers_with_info: fiber indices considered to solve the problem
-#             recover_angular_accel: Defaults to False.
-#         '''
-#         super().__init__()
-#         self.fibers_with_info = fibers_with_info
-#         if recover_angular_accel:
-#             print('Not implemented yet.')
-#         else:
-#             self.var_xi = np.ones(self.fibers_with_info.size,4)
-#             self.var_gamma = np.zeros((4,1))
-#             self.var_psi = np.zeros((self.fibers_with_info.size,1))
-#             # contruct the constant var_gamma matrix and solution of least squared
-#             for i in range(self.fibers_with_info.size):
-#                 self.var_gamma[:]
+class InverseProblem(AccelModelInertialFrame):
+    """docstring for inverse_problem."""
 
-    
+    def __init__(self, fibers_with_info: np.ndarray, recover_angular_accel=False):
+        '''
+        __init__ Contructor of inverse_problem. 
+        Args:
+            fibers_with_info: fiber indices considered to solve the problem
+            recover_angular_accel: Defaults to False.
+        '''
+        super().__init__()
+        self.fibers_with_info = fibers_with_info
+        if recover_angular_accel:
+            print('Not implemented yet.')
+        else:
+            self.var_xi = np.ones((self.fibers_with_info.size, 4))
+            self.var_gamma = np.zeros((4, 1))
+            self.var_psi = np.zeros((self.fibers_with_info.size, 1))
+            # contruct the constant var_gamma matrix and solution of least squared
+            _aux_vector = np.ones((self.fibers_with_info.size, 3))
+            '''auxiliar vector to compute (m-b) with dimenstion fiber_with_sise by 3, used on var_xi and var_psi'''
+            self.aux_var_psi_matrix = np.zeros((self.fibers_with_info.size, 1))
+            for i, j in zip(range(self.fibers_with_info.size), self.fibers_with_info):
+                _aux_vector[i, :] = self.m_M[j-1, :] - self.b_B[j-1, :]
+
+            self.var_xi[:, 1:] = 2.0*_aux_vector
+            if self.var_xi.shape[0] == self.var_gamma.shape[1]:
+                # in this case the least squared method use only the inverse matrix of var_gamma
+                self.least_square_matrix = np.linalg.inv(self.var_xi)
+            else:
+                # It is necessary compute pseud inverse of matrix
+                self.least_square_matrix = np.linalg.pinv(self.var_xi)
+
+    def compute_inverse_problem_solution(self, deformation):
+        '''
+        compute_inverse_problem_solution 
+        Args:
+            deformations: vector of deformations
+        '''
+        self.var_psi = np.square(
+            deformation+self.fiber_length)-self.aux_var_psi_matrix
+        return self.least_square_matrix @ self.var_psi
