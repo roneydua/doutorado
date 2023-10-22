@@ -346,7 +346,8 @@ class AccelModelInertialFrame(object):
 
     def update_inertial_coil_connections(self):
         '''
-        update_inertial_coil_connections update the inertial coordinates of mass and body connections
+        update the inertial coordinates of mass and body connections
+        
         The deformation vector f is also updated.
 
         '''
