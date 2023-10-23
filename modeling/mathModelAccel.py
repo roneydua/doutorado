@@ -552,7 +552,12 @@ class AccelModelInertialFrame(object):
 
 class InverseProblem(AccelModelInertialFrame):
     """docstring for inverse_problem."""
-
+    recover_type_flag = ''
+    estimated_rm_B = np.zeros(3)
+    # estimate relative position of body and seismic mass
+    estimated_f_B = np.zeros((12, 3))
+    # estimate f vector on B coordinate system
+    norm_of_estimated_f_B = np.zeros((12, 1),dtype=np.float64)
     def __init__(self, fibers_with_info: np.ndarray, recover_angular_accel=False):
         '''
         __init__ Contructor of inverse_problem. 
@@ -562,6 +567,8 @@ class InverseProblem(AccelModelInertialFrame):
         '''
         super().__init__()
         self.fibers_with_info = fibers_with_info
+        self.k_by_m = self.k/self.seismic_mass
+        '''Ratio between stiffnes and mass to use on accel recover'''
         if recover_angular_accel:
             print('Not implemented yet.')
         else:
