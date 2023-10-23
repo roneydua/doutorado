@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 '''
-@File    :   inveser_problem_solution.py
+@File    :   inverse_problem_solution.py
 @Time    :   2023/10/19 15:15:52
 @Author  :   Roney D. Silva
 @Contact :   roneyddasilva@gmail.com
@@ -44,3 +44,17 @@ def recover_acceleration():
 recover_acceleration()
 
 
+def print_recover_acceleration()
+    
+    f = h5py.File('modeling_data.hdf5', 'r')
+    ff = f['test_of_group']
+    ff.keys()
+    # fig.clear()
+    fig, ax = plt.subplots(3, 1, num=1 ,sharex=True, figsize=(FIG_L, FIG_A))
+    
+    for i in range(3):
+        ax[i].plot(ff['t'][:],ff['true_accel'][i,:],label='Referência')
+        ax[i].plot(ff['t'][:],ff['recover_accel_simple'][i,:],label='Recuperada')
+        ax[i].legend()    
+
+    plt.show()
