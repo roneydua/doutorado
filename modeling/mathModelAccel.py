@@ -379,7 +379,7 @@ class AccelModelInertialFrame(object):
         self.update_inertial_coil_connections()
         self.update_f_vector()
 
-    def get_d_rb(self,d_x:np.ndarray):
+    def get_d_rb(self, d_x: np.ndarray):
         '''
         get_d_rb return inertial velocity of body sensor
 
@@ -388,7 +388,7 @@ class AccelModelInertialFrame(object):
                     [drb,drm,rb,rm,qb,qm,wb,wm]    
         Returns:
             d_rb: inertial velocity of body sensor
-        '''        
+        '''
         return d_x[:3]
 
     def get_d_rm(self, d_x: np.ndarray):
@@ -414,7 +414,7 @@ class AccelModelInertialFrame(object):
             rb: inertial  position of body sensor
         '''
         return d_x[6:9]
-    
+
     def get_rm(self, d_x: np.ndarray):
         '''
         get_rm return inertial position of seismic mass
@@ -426,7 +426,7 @@ class AccelModelInertialFrame(object):
             rm: inertial position of seismic mass
         '''
         return d_x[9:12]
-    
+
     def get_qb(self, d_x: np.ndarray):
         '''
         get_qb return atitude quaternion of body sensor
@@ -474,11 +474,8 @@ class AccelModelInertialFrame(object):
             wm: Angular velocity of seismic mass
         '''
         return d_x[23:26]
-    
-    
 
-
-    def dd_x_forced_body_state(self, d_x:np.ndarray):
+    def dd_x_forced_body_state(self, d_x: np.ndarray):
         '''
         dd_x_forced_body_state calc second order of model for numerical integration.
         Args:
