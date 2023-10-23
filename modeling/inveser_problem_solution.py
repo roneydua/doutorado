@@ -6,10 +6,13 @@
 @Author  :   Roney D. Silva
 @Contact :   roneyddasilva@gmail.com
 '''
-import numpy as np
+from modeling.mathModelAccel import InverseProblem
 import locale
+
 import h5py
 import matplotlib.pyplot as plt
+import numpy as np
+from tqdm import tqdm
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 # plt.style.use("default")
 plt.style.use("common_functions/roney3.mplstyle")
