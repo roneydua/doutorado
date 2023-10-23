@@ -363,7 +363,9 @@ class AccelModelInertialFrame(object):
 
     def update_states(self, rb, qb, rm, qm):
         '''
-        update_states Update the states of translation and rotation
+        update_states(): Update the states of translation and rotation
+        
+        Note, this function call update_inertial_coil_connections() and update_f_vector() to update f vector.
         Args:
             rb: translation vector of body system with respect of inertial
             qb: quaternion of attitude of body sensor
@@ -377,12 +379,110 @@ class AccelModelInertialFrame(object):
         self.update_inertial_coil_connections()
         self.update_f_vector()
 
-    def dd_x_forced_body_state(self, d_x, u):
+    def get_d_rb(self,d_x:np.ndarray):
+        '''
+        get_d_rb return inertial velocity of body sensor
+
+        Args:
+            d_x: Complete vector of state space of problem in order:
+                    [drb,drm,rb,rm,qb,qm,wb,wm]    
+        Returns:
+            d_rb: inertial velocity of body sensor
+        '''        
+        return d_x[:3]
+
+    def get_d_rm(self, d_x: np.ndarray):
+        '''
+        get_d_rm return inertial velocity of seismic mass
+
+        Args:
+            d_x: Complete vector of state space of problem in order:
+                    [drb,drm,rb,rm,qb,qm,wb,wm]    
+        Returns:
+            d_rm: inertial velocity of seismic mass
+        '''
+        return d_x[3:6]
+
+    def get_rb(self, d_x: np.ndarray):
+        '''
+        get_rb return inertial  position of body sensor
+
+        Args:
+            d_x: Complete vector of state space of problem in order:
+                    [drb,drm,rb,rm,qb,qm,wb,wm]    
+        Returns:
+            rb: inertial  position of body sensor
+        '''
+        return d_x[6:9]
+    
+    def get_rm(self, d_x: np.ndarray):
+        '''
+        get_rm return inertial position of seismic mass
+
+        Args:
+            d_x: Complete vector of state space of problem in order:
+                    [drb,drm,rb,rm,qb,qm,wb,wm]    
+        Returns:
+            rm: inertial position of seismic mass
+        '''
+        return d_x[9:12]
+    
+    def get_qb(self, d_x: np.ndarray):
+        '''
+        get_qb return atitude quaternion of body sensor
+
+        Args:
+            d_x: Complete vector of state space of problem in order:
+                    [drb,drm,rb,rm,qb,qm,wb,wm]    
+        Returns:
+            qb: Atitude quaternion of body sensor
+        '''
+        return d_x[12:16]
+
+    def get_qm(self, d_x: np.ndarray):
+        '''
+        get_qm return attitude quaternion of seismic mass
+
+        Args:
+            d_x: Complete vector of state space of problem in order:
+                    [drb,drm,rb,rm,qb,qm,wb,wm]    
+        Returns:
+            qm: Atitude quaternion of seismic mass
+        '''
+        return d_x[16:20]
+
+    def get_wb(self, d_x: np.ndarray):
+        '''
+        get_wb return angular velocity of body sensor
+
+        Args:
+            d_x: Complete vector of state space of problem in order:
+                    [drb,drm,rb,rm,qb,qm,wb,wm]    
+        Returns:
+            wb: Angular velocity of body sensor
+        '''
+        return d_x[20:23]
+
+    def get_wm(self, d_x: np.ndarray):
+        '''
+        get_wm return angular velocity of seismic mass
+
+        Args:
+            d_x: Complete vector of state space of problem in order:
+                    [drb,drm,rb,rm,qb,qm,wb,wm]    
+        Returns:
+            wm: Angular velocity of seismic mass
+        '''
+        return d_x[23:26]
+    
+    
+
+
+    def dd_x_forced_body_state(self, d_x:np.ndarray):
         '''
         dd_x_forced_body_state calc second order of model for numerical integration.
         Args:
-            dd_x: second order give a first order states
-            d_x: firts order [rb,rm,qb,qm,drb,drm,wb,wm]
+            d_x: firts order [drb,drm,rb,rm,qb,qm,wb,wm]
         '''
         # d_x = np.arange(1, 21)
         dd_x = 1.0 * d_x
