@@ -597,5 +597,26 @@ class InverseProblem(AccelModelInertialFrame):
             deformations: vector of deformations
         '''
         self.var_psi = np.square(
-            deformation+self.fiber_length)-self.aux_var_psi_matrix
-        return self.least_square_matrix @ self.var_psi
+            deformations)-self.aux_var_psi_matrix
+        self.var_gamma = self.least_square_matrix @ self.var_psi
+
+    def estimate_f_vector(self):
+        '''
+        estimate_f_vector Estimation with estimated relative positions r_m_B
+
+        Args:
+            estimated_rm_B: the vectors solution
+
+        Returns:
+            _description_ the estimate f vector (12,3)
+        '''
+        
+        for i in range(12):
+            self.estimated_f_B[i,:] = self.var_gamma[1:] + self.diff_m_M_b_B[i,:]
+        self.norm_of_estimated_f_B = np.linalg.norm(self.estimated_f_B,axis=1)
+    
+    def estimate_ddrm_B(self):
+        _t = np.zeros(3)
+        for i in range(12):
+            _t += ((self.norm_of_estimated_f_B[i]-self.fiber_length)/self.norm_of_estimated_f_B[i])*self.estimated_f_B[i,:]
+        return -self.k_by_m * _t    
