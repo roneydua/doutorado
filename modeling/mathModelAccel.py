@@ -347,7 +347,7 @@ class AccelModelInertialFrame(object):
     def update_inertial_coil_connections(self):
         '''
         update the inertial coordinates of mass and body connections
-        
+
         The deformation vector f is also updated.
 
         '''
@@ -364,7 +364,7 @@ class AccelModelInertialFrame(object):
     def update_states(self, rb, qb, rm, qm):
         '''
         update_states(): Update the states of translation and rotation
-        
+
         Note, this function call update_inertial_coil_connections() and update_f_vector() to update f vector.
         Args:
             rb: translation vector of body system with respect of inertial
