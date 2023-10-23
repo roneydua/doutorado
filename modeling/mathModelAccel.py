@@ -475,7 +475,7 @@ class AccelModelInertialFrame(object):
         '''
         return d_x[23:26]
 
-    def dd_x_forced_body_state(self, d_x: np.ndarray):
+    def dd_x_forced_body_state(self, d_x: np.ndarray, u:np.ndarray or None):
         '''
         dd_x_forced_body_state calc second order of model for numerical integration.
         Args:
@@ -590,7 +590,7 @@ class InverseProblem(AccelModelInertialFrame):
                 # It is necessary compute pseud inverse of matrix
                 self.least_square_matrix = np.linalg.pinv(self.var_xi)
 
-    def compute_inverse_problem_solution(self, deformation):
+    def compute_inverse_problem_solution(self, deformations: np.ndarray):
         '''
         compute_inverse_problem_solution 
         Args:
