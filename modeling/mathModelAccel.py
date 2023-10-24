@@ -567,6 +567,7 @@ class InverseProblem(AccelModelInertialFrame):
         '''
         super().__init__()
         self.fibers_with_info = fibers_with_info
+        self.fibers_with_info_index = fibers_with_info-1
         self.k_by_m = self.k/self.seismic_mass
         '''Ratio between stiffnes and mass to use on accel recover'''
         if recover_angular_accel:
@@ -619,5 +620,4 @@ class InverseProblem(AccelModelInertialFrame):
     def estimate_ddrm_B(self):
         _t = np.zeros(3)
         for i in range(12):
-            _t += ((self.norm_of_estimated_f_B[i]-self.fiber_length)/self.norm_of_estimated_f_B[i])*self.estimated_f_B[i,:]
-        return -self.k_by_m * _t    
+        self.fibers_with_info_index = fibers_with_info-1
