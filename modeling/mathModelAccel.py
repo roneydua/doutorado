@@ -559,14 +559,14 @@ class InverseProblem(AccelModelInertialFrame):
     # estimate f vector on B coordinate system
     norm_of_estimated_f_B = np.zeros((12, 1), dtype=np.float64)
 
-    def __init__(self, fibers_with_info: np.ndarray, recover_angular_accel=False):
+    def __init__(self, fibers_with_info: np.ndarray, recover_angular_accel=False, fiber_length=3e-3):
         '''
         __init__ Contructor of inverse_problem. 
         Args:
             fibers_with_info: fiber indices considered to solve the problem
             recover_angular_accel: Defaults to False.
         '''
-        super().__init__()
+        super().__init__(fiber_length=fiber_length)
         self.fibers_with_info = fibers_with_info
         self.fibers_with_info_index = fibers_with_info-1
         self.k_by_m = self.k/self.seismic_mass
@@ -592,7 +592,7 @@ class InverseProblem(AccelModelInertialFrame):
             else:
                 # It is necessary compute pseud inverse of matrix
                 self.least_square_matrix = np.linalg.pinv(self.var_xi)
-            
+
             self.diff_m_M_b_B = self.m_M - self.b_B
 
     def compute_inverse_problem_solution(self, fiber_len: np.ndarray):
@@ -633,14 +633,14 @@ class SimpleSolution(AccelModelInertialFrame):
     """Implementação do método empregado no trabalho do Cazo."""
     norm_of_estimated_f_B = np.zeros((12, 1), dtype=np.float64)
 
-    def __init__(self, fibers_with_info: np.ndarray):
+    def __init__(self, fibers_with_info: np.ndarray, fiber_length=3e-3,push_pull=False):
         '''
         __init__ Contructor of inverse_problem. 
         Args:
             fibers_with_info: fiber indices considered to solve the problem
             recover_angular_accel: Defaults to False.
         '''
-        super().__init__()
+        super().__init__(fiber_length=fiber_length)
         # self.fibers_with_info = fibers_with_info
         self.fibers_with_info_index = fibers_with_info-1
         self.k_by_m = 4.0*self.k/self.seismic_mass
