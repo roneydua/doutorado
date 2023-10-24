@@ -580,9 +580,10 @@ class InverseProblem(AccelModelInertialFrame):
             _aux_vector = np.ones((self.fibers_with_info.size, 3))
             '''auxiliar vector to compute (m-b) with dimenstion fiber_with_sise by 3, used on var_xi and var_psi'''
             self.aux_var_psi_matrix = np.zeros(self.fibers_with_info.size)
-            for i, j in zip(range(self.fibers_with_info.size), self.fibers_with_info):
-                _aux_vector[i, :] = self.m_M[j-1, :] - self.b_B[j-1, :]
-
+            for i, j in enumerate(self.fibers_with_info_index):
+                _aux_vector[i, :] = self.m_M[j, :] - self.b_B[j, :]
+                self.aux_var_psi_matrix[i] = _aux_vector[i, :].dot(
+                    _aux_vector[i, :])
             self.var_xi[:, 1:] = 2.0*_aux_vector
             if self.var_xi.shape[0] == self.var_gamma.size:
                 # in this case the least squared method use only the inverse matrix of var_gamma
@@ -590,7 +591,8 @@ class InverseProblem(AccelModelInertialFrame):
             else:
                 # It is necessary compute pseud inverse of matrix
                 self.least_square_matrix = np.linalg.pinv(self.var_xi)
-        self.diff_m_M_b_B = self.m_M - self.b_B
+            
+            self.diff_m_M_b_B = self.m_M - self.b_B
 
     def compute_inverse_problem_solution(self, deformations: np.ndarray):
         '''
