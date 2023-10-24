@@ -620,4 +620,29 @@ class InverseProblem(AccelModelInertialFrame):
     def estimate_ddrm_B(self):
         _t = np.zeros(3)
         for i in range(12):
+class SimpleSolution(AccelModelInertialFrame):
+    """Implementação do método empregado no trabalho do Cazo."""
+    norm_of_estimated_f_B = np.zeros((12, 1), dtype=np.float64)
+
+    def __init__(self, fibers_with_info: np.ndarray):
+        '''
+        __init__ Contructor of inverse_problem. 
+        Args:
+            fibers_with_info: fiber indices considered to solve the problem
+            recover_angular_accel: Defaults to False.
+        '''
+        super().__init__()
+        # self.fibers_with_info = fibers_with_info
         self.fibers_with_info_index = fibers_with_info-1
+        self.k_by_m = 4.0*self.k/self.seismic_mass
+        ''' 4 k/m !!!!! Note the coeficient 4'''
+
+    def estimated_ddrm_B(self, fiber_len: np.ndarray):
+        '''
+        estimated_ddrm_B Estimation of accel with no cross effects
+        This method use the fibers_with_info_index variables to extract correct dimensions
+        Args:
+            fiber_len: 12 dimenentional vector of current fiber lengths  
+        '''
+        _r = np.take(fiber_len, self.fibers_with_info_index)-self.fiber_length
+        return self.k_by_m * _r
