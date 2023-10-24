@@ -534,10 +534,10 @@ class AccelModelInertialFrame(object):
         # calculate d_rm
         dd_x[9:12] = d_rm
         # Left quaternion matrix
-        Qb = fq.matrixQ(qb)
+        # Qb = fq.matrixQ(qb)
         Qm = fq.matrixQ(qm)
         # calculate attitude quaternion of body sensor
-        dd_x[12:16] = 0.5 * Qb @ wb
+        # dd_x[12:16] = 0.5 * Qb @ wb
         # calculate attitude quaternion of seismic mass
         dd_x[16:20] = 0.5 * Qm @ wm
         # calculate a angular acceleration of body sensor
