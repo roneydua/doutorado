@@ -624,6 +624,11 @@ class InverseProblem(AccelModelInertialFrame):
     def estimate_ddrm_B(self):
         _t = np.zeros(3)
         for i in range(12):
+            _t += ((self.norm_of_estimated_f_B[i]-self.fiber_length) /
+                   self.norm_of_estimated_f_B[i])*self.estimated_f_B[i, :]
+        return -self.k_by_m * _t
+
+
 class SimpleSolution(AccelModelInertialFrame):
     """Implementação do método empregado no trabalho do Cazo."""
     norm_of_estimated_f_B = np.zeros((12, 1), dtype=np.float64)
