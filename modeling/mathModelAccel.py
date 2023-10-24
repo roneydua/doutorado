@@ -643,8 +643,13 @@ class SimpleSolution(AccelModelInertialFrame):
         super().__init__(fiber_length=fiber_length)
         # self.fibers_with_info = fibers_with_info
         self.fibers_with_info_index = fibers_with_info-1
-        self.k_by_m = 4.0*self.k/self.seismic_mass
-        ''' 4 k/m !!!!! Note the coeficient 4'''
+        self.push_pull = push_pull
+        if push_pull is True:
+            self.fiber_length_push_pull = np.zeros(3)
+            self.k_by_m = 2.0*self.k/self.seismic_mass
+        else:
+            self.k_by_m = 4.0*self.k/self.seismic_mass
+            ''' 4 k/m !!!!! Note the coeficient 4'''
 
     def estimated_ddrm_B(self, fiber_len: np.ndarray):
         '''
@@ -653,5 +658,12 @@ class SimpleSolution(AccelModelInertialFrame):
         Args:
             fiber_len: 12 dimenentional vector of current fiber lengths  
         '''
-        _r = np.take(fiber_len, self.fibers_with_info_index)-self.fiber_length
-        return self.k_by_m * _r
+        if self.push_pull:
+            self.fiber_length_push_pull[0] = fiber_len[0]-fiber_len[2]
+            self.fiber_length_push_pull[1] = fiber_len[4]-fiber_len[6]
+            self.fiber_length_push_pull[2] = fiber_len[8]-fiber_len[10]
+            _r = self.fiber_length_push_pull
+            return self.k_by_m * _r
+        else:
+            _r = np.take(fiber_len, self.fibers_with_info_index)-self.fiber_length
+            return self.k_by_m * _r
