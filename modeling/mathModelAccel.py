@@ -475,7 +475,7 @@ class AccelModelInertialFrame(object):
         '''
         return d_x[23:26]
 
-    def dd_x_forced_body_state(self, d_x: np.ndarray, u:np.ndarray or None):
+    def dd_x_forced_body_state(self, d_x: np.ndarray, u: np.ndarray or None):
         '''
         dd_x_forced_body_state calc second order of model for numerical integration.
         Args:
@@ -557,7 +557,8 @@ class InverseProblem(AccelModelInertialFrame):
     # estimate relative position of body and seismic mass
     estimated_f_B = np.zeros((12, 3))
     # estimate f vector on B coordinate system
-    norm_of_estimated_f_B = np.zeros((12, 1),dtype=np.float64)
+    norm_of_estimated_f_B = np.zeros((12, 1), dtype=np.float64)
+
     def __init__(self, fibers_with_info: np.ndarray, recover_angular_accel=False):
         '''
         __init__ Contructor of inverse_problem. 
@@ -614,11 +615,12 @@ class InverseProblem(AccelModelInertialFrame):
         Returns:
             _description_ the estimate f vector (12,3)
         '''
-        
+
         for i in range(12):
-            self.estimated_f_B[i,:] = self.var_gamma[1:] + self.diff_m_M_b_B[i,:]
-        self.norm_of_estimated_f_B = np.linalg.norm(self.estimated_f_B,axis=1)
-    
+            self.estimated_f_B[i, :] = self.var_gamma[1:] + \
+                self.diff_m_M_b_B[i, :]
+        self.norm_of_estimated_f_B = np.linalg.norm(self.estimated_f_B, axis=1)
+
     def estimate_ddrm_B(self):
         _t = np.zeros(3)
         for i in range(12):
