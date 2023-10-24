@@ -594,14 +594,14 @@ class InverseProblem(AccelModelInertialFrame):
             
             self.diff_m_M_b_B = self.m_M - self.b_B
 
-    def compute_inverse_problem_solution(self, deformations: np.ndarray):
+    def compute_inverse_problem_solution(self, fiber_len: np.ndarray):
         '''
         compute_inverse_problem_solution 
         Args:
-            deformations: vector of deformations
+            fiber_len: vector of fiber_len is ((f).dot(f))^2
         '''
         self.var_psi = np.square(
-            deformations)-self.aux_var_psi_matrix
+            fiber_len)-self.aux_var_psi_matrix
         self.var_gamma = self.least_square_matrix @ self.var_psi
 
     def estimate_f_vector(self):
