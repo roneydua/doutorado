@@ -11,7 +11,7 @@ import numpy as np
 from tqdm import tqdm
 import h5py
 import pandas as pd
-from modeling.mathModelAccel import AccelModelInertialFrame
+from modeling.mathModelAccel import AccelModelInertialFrame, InverseProblem, SimpleSolution
 from common_functions.RK import RungeKutta
 from common_functions import funcoesQuaternion as fq
 
@@ -44,7 +44,11 @@ class statesOfSimulation_object(object):
         self.hf['true_accel'] = np.zeros(shape=(3, self.hf['t'].size))
         self.hf['true_accel'].attrs['about'] = 'Exact acceleration'
         """ Relative deformation with respect of the initial length (l-l0)/l. """
+        self.hf['f'] = np.zeros(shape=(12, 3, self.hf['t'].size))
+        self.hf['fiber_len'] = np.zeros(shape=(12, self.hf['t'].size))
 
+        self.hf.create_dataset('recover_accel_simple', (3, ff['t'].size))
+        self.hf.create_dataset('recover_accel_ls_simple', (3, ff['t'].size))
         self.hf.attrs['b_B'] = accel.b_B
         self.hf.attrs['m_M'] = accel.m_M
         self.hf.attrs['k'] = accel.k
@@ -125,6 +129,14 @@ if __name__ == "__main__":
                         rm=s.hf['x'][9:12, 0],
                         qb=s.hf['x'][12:16, 0],
                         qm=s.hf['x'][16:20, 0])
+    s.hf['f'][:, :, 0] = accel.f
+    s.hf['fiber_len'][:, 0] = np.linalg.norm(accel.f, axis=1)
+
+    fibers_with_length_info = np.array([1, 4, 5, 8, 9, 12])
+    deformation = np.zeros((fibers_with_length_info.size, 1))
+    ip = InverseProblem(fibers_with_length_info)
+    ss = SimpleSolution(np.array([1, 5, 9]))
+
     for i in tqdm(range(s.hf['t'].size - 1)):
         # integration of states
         s.hf['x'][:, i + 1] = RK.integrates_states(
@@ -145,15 +157,15 @@ if __name__ == "__main__":
                             rm=s.hf['x'][9:12, i + 1],
                             qb=s.hf['x'][12:16, i + 1],
                             qm=s.hf['x'][16:20, i + 1])
-        # s.f_norm[:, i] = np.linalg.norm(accel.f_B, axis=1) - accel.fiber_length
-        # s.deformation[:, i] = s.f_norm[:, i] / accel.fiber_length
-        # s.recover_accel_simple[
-        #     0, i + 1] = 4.0 * accel.k * s.f_norm[0, i] / accel.seismic_mass
-        # s.recover_accel_simple[
-        #     1, i + 1] = 4.0 * accel.k * s.f_norm[4, i] / accel.seismic_mass
-        # s.recover_accel_simple[
-        #     2, i +
-        #     1] = 4.0 * accel.k * s.f_norm[9, i] / accel.seismic_mass + accel.G
+        s.hf['f'][:, :, i+1] = accel.f
+        s.hf['fiber_len'][:, i+1] = np.linalg.norm(accel.f, axis=1)
+        # compute estimate rb_m
+        ip.compute_inverse_problem_solution(
+            np.take(s.hf['fiber_len'][:, i+1], ip.fibers_with_info_index))
+        ip.estimate_f_vector()
+        ff['recover_accel_ls_simple'][:, i+1] = ip.estimate_ddrm_B()
+        ff['recover_accel_simple'][:, i+1] = ss.estimated_ddrm_B(
+            ff['fiber_len'][:, i+1])
     # f.close()
     # s.saveData('data/vertical_acceleration.pickle')
 
