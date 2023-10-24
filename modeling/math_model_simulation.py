@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+'''
+@File    :   math_model_simulation.py
+@Time    :   2023/10/24 09:04:05
+@Author  :   Roney D. Silva
+@Contact :   roneyddasilva@gmail.com
+'''
 
 import numpy as np
 from tqdm import tqdm
@@ -9,6 +17,7 @@ from common_functions import funcoesQuaternion as fq
 
 import matplotlib.pyplot as plt
 
+# %%
 
 class statesOfSimulation_object(object):
 
@@ -85,9 +94,9 @@ if __name__ == "__main__":
 
     def angular_velocity_value(time):
         y = np.array([0.0, 0.0, 0.0])
-        y[0] =  (np.exp(-time)-1)* np.sin(ft*time)
-        y[1] =  (np.exp(-time)-1)* np.cos(ft_y * time)
-        y[2] =   np.exp(-time)-1
+        y[0] = (np.exp(-time)-1) * np.sin(ft*time)
+        y[1] = (np.exp(-time)-1) * np.cos(ft_y * time)
+        y[2] = np.exp(-time)-1
         return y
 
     accel = AccelModelInertialFrame(damper_for_computation_simulations=1e-6)
@@ -107,7 +116,7 @@ if __name__ == "__main__":
     s.hf['x'][:3, 0] = velocity_value(s.hf['t'][0])  # body velocity
     s.hf['x'][3:6, 0] = velocity_value(s.hf['t'][0])  # seismic mass  velocity
     s.hf['x'][6:9, 0] = position_value(s.hf['t'][0])  # body position
-    s.hf['x'][9:12, 0] = position_value(s.hf['t'][0])# seismic mass position
+    s.hf['x'][9:12, 0] = position_value(s.hf['t'][0])  # seismic mass position
 
     s.hf['x'][20:23, 0] = angular_velocity_value(s.hf['t'][0])
     s.hf['x'][23:, 0] = angular_velocity_value(s.hf['t'][0])
