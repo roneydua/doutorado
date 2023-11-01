@@ -57,11 +57,16 @@ while True:
         print('Stop of aquisiton')
         break
 
-
-data = np.column_stack((wavelength, y_all))
+print("save data on hdf file")
+f = h5py.File('fbg_production/production_file_temp.hdf5','a')
 now = datetime.now()
-# save_name = 'temp_data/'+now.strftime(r"%y%m%d/%H%M%S")+'.csv'
-save_name = 'temp_data/'+now.strftime(r"%Y%m%d/%H%M%S")+'.csv'
-print('save data on' +save_name )
-np.savetxt(save_name, data)
+ff = f.require_group(now.strftime(r"%Y%m%d"))
+# check number of fbg on group
+number_of_dataset = len(ff.keys())
+fff = ff.require_group('fbg'+str(1+number_of_dataset))
+fff.attrs['optical_fiber'] = 'sm1500(4.2/125)'
+fff.create_dataset('wavelength', data=wavelength)
+fff.create_dataset('optical_power',data=y_all)
+fff.create_dataset('reflectivity',data=reflectivity)
+f.close()
 
