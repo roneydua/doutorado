@@ -25,7 +25,7 @@ class Q8347(object):
         object: _description_
     '''
 
-    def __init__(self, center=1550, gpib_adress='GPIB0::8::INSTR', span=None):
+    def __init__(self, center=1550, gpib_adress='GPIB0::8::INSTR', span=None, high_resolution=True):
         '''
         __init__ constructor of Q8347 Advantest
 
@@ -45,6 +45,10 @@ class Q8347(object):
             self.set_center(center)
         if span != None:
             self.set_span(span)
+        if high_resolution:
+            self.set_resolution(high=True)
+        else: 
+            self.set_resolution(high=False)
 
     def checkSTB(self, t=1):  # FUNÇÃO BASEADA NO "wait of spectrometer" do Gabriel
         sleep(1)  # Como o Advantest nao tem a função do GPIB (SRQ),
@@ -72,6 +76,17 @@ class Q8347(object):
         # convert to numpy arrays
         self.wavelength_nm = asfarray(x.split(','))
         self.optical_power_dbm = asfarray(y.split(','))
+        
+    def set_resolution(self, high=True):
+        '''
+        set_resolution Set resolution mode
+        Args:
+            high: mode of resolution. Defaults to True.
+        '''
+        if high:
+            self.osa.write('RES 1')
+        else:
+            self.osa.write('RES 0')
 
     def set_span(self, span: float, unit='NM'):
         '''
