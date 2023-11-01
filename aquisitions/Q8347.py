@@ -110,3 +110,6 @@ class Q8347(object):
         '''
         self.center = center
         self.osa.write('CEN'+str(center)+unit)
+
+    def close(self):
+        self.osa.close()
