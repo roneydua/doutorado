@@ -74,7 +74,7 @@ class Q8347(object):
         x = x[5:]
         y = y[5:]
         # convert to numpy arrays
-        self.wavelength_nm = asfarray(x.split(','))
+        self.wavelength_m = asfarray(x.split(','))
         self.optical_power_dbm = asfarray(y.split(','))
         
     def set_resolution(self, high=True):

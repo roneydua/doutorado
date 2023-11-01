@@ -15,6 +15,7 @@ from aquisitions.Q8347 import Q8347
 from common_functions.generic_functions import reflectivity_transmition
 from datetime import datetime
 from pathlib import Path
+import h5py
 # InteractiveShell.ast_node_interactivity = "all"
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 # plt.style.use("default")
@@ -23,14 +24,11 @@ my_colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 FIG_L = 6.29
 FIG_A = (90.0) / 25.4
 
-
-# t = np.arange(1,20,.1)
-# y = np.sin(np.random.rand(1)[0]*t)
-osa = Q8347(center=1550,span=20)
+osa = Q8347(center=1550,span=20,high_resolution=True)
 osa.read()
 
 
-wavelength = osa.wavelength_nm
+wavelength_m = osa.wavelength_m
 y = osa.optical_power_dbm
 y_all = np.zeros((y.size,1))
 
@@ -65,8 +63,8 @@ ff = f.require_group(now.strftime(r"%Y%m%d"))
 number_of_dataset = len(ff.keys())
 fff = ff.require_group('fbg'+str(1+number_of_dataset))
 fff.attrs['optical_fiber'] = 'sm1500(4.2/125)'
-fff.create_dataset('wavelength', data=wavelength)
-fff.create_dataset('optical_power',data=y_all)
+fff.create_dataset('wavelength_m', data=wavelength_m)
+fff.create_dataset('optical_power_dbm',data=y_all)
 fff.create_dataset('reflectivity',data=reflectivity)
 f.close()
 
