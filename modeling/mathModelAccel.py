@@ -292,7 +292,7 @@ class AccelModelInertialFrame(object):
         self.seismic_mass = (self.seismic_edge ** 3.0) * self.density
         '''Sismic mass'''
         self.external_base_sensor_edge = self.seismic_edge + 2 * self.fiber_length + 4e-3
-        """# approximation of the base of the sensor as a cube.The value 6e-3 refers double the length of the fibers that support the cube.4e-3 is twice the thickness."""
+        """ approximation of the base of the sensor as a cube.The value 6e-3 refers double the length of the fibers that support the cube.4e-3 is twice the thickness."""
         self.base_sensor_edge = self.seismic_edge + 2 * self.fiber_length
         self.base_sensor_mass = (
             self.external_base_sensor_edge**3 - self.base_sensor_edge ** 3) * self.density
@@ -501,7 +501,6 @@ class AccelModelInertialFrame(object):
         wm = d_x[23:26]
         '''Angular velocity of seismic mass'''
         # calculate deformation vector
-        # NOTE: can be optimized, but, for best understanding, we
         f_hat_dell = np.zeros((3, 12))
         sum_f_hat_dell = np.zeros(3)
         sum_f_hat_dell_dfdq_M = np.zeros(4)
@@ -553,8 +552,11 @@ class AccelModelInertialFrame(object):
 class InverseProblem(AccelModelInertialFrame):
     """docstring for inverse_problem."""
     recover_type_flag = ''
+    '''Type of recover. full_estimation for complete solution and full_estimation_reduced to recover angular acceleration. linear_estimation dont recover angular accelerations'''
     estimated_rm_B = np.zeros(3)
-    # estimate relative position of body and seismic mass
+    # estimated relative position of body and seismic mass
+    estimated_q_M_B = np.zeros(4)
+    # estimated atitude quaternion seismic mass with respect to body
     estimated_f_B = np.zeros((12, 3))
     # estimate f vector on B coordinate system
     norm_of_estimated_f_B = np.zeros((12, 1), dtype=np.float64)
@@ -565,6 +567,9 @@ class InverseProblem(AccelModelInertialFrame):
         Args:
             fibers_with_info: fiber indices considered to solve the problem
             recover_angular_accel: Defaults to False.
+            fiber_length: size of fiber. Defaults is 3mm or (0.003m)
+        **kwargs: full_estimation: True to recover the term q_M_B cross r_m_B 
+            
         '''
         super().__init__(fiber_length=fiber_length)
         self.fibers_with_info = fibers_with_info
