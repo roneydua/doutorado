@@ -31,28 +31,32 @@ osa.read()
 wavelength_m = osa.wavelength_m
 y = osa.optical_power_dbm
 y_all = np.zeros((y.size,1))
+reflectivity = np.zeros((y.size,1))
+
 
 y_all[:,0] = y
-fig, ax = plt.subplots(2, 1, num=1, sharex=True,figsize=(FIG_L, FIG_A), dpi=144)
+fig, ax = plt.subplots(2, 1, num=1, sharex=True,figsize=(FIG_L, 2*FIG_A), dpi=100)
 plt.show()
 fig.supxlabel(r'$\lambda, [\si{\nm}]$')
-ax[0].set_ylabel('Potência óptica [dBm]')
-ax[1].set_ylabel('Refletividade')
-iteration = 1
+iteration=1
 while True:
     try:
-        ax[0].clear()
-        ax[0].plot(wavelength*1e9, y)
-        # ax[1].plot(wavelength*1e9, y_all[:, 0])
+        print('Aquisition number '+str(iteration))
         r = reflectivity_transmition(d0=y_all[:, 0],di=y_all[:,iteration-1])
-        ax[1].plot(wavelength*1e9, r)
-        y_all = np.column_stack((y_all, y))
-        plt.pause(.1)
-        print('Aquisition...')
+        ax[0].plot(wavelength_m*1e9, y)
+        ax[1].clear()
+        ax[1].set_ylabel('Refletividade')
+        ax[1].plot(wavelength_m*1e9, r)
+        ax[1].set_ylim(-.10,1)
+        plt.pause(.01)
         osa.read()
         y = osa.optical_power_dbm
+        y_all = np.column_stack((y_all, y))
+        reflectivity = np.column_stack((reflectivity, r))
+        iteration +=1
     except KeyboardInterrupt:
         print('Stop of aquisiton')
+        osa.close()
         break
 
 print("save data on hdf file")
@@ -67,4 +71,10 @@ fff.create_dataset('wavelength_m', data=wavelength_m)
 fff.create_dataset('optical_power_dbm',data=y_all)
 fff.create_dataset('reflectivity',data=reflectivity)
 f.close()
+plt.savefig('fbg_production'+'/fig_production_figs/'+now.strftime(r"%Y%m%d") +
+            '/fbg'+str(1+number_of_dataset)+".png", format="png", transparent=False)
+plt.close(fig=1)
+plt.close(fig=1)
+print("ok")
+
 
