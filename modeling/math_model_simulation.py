@@ -17,7 +17,6 @@ from common_functions import funcoesQuaternion as fq
 
 import matplotlib.pyplot as plt
 
-# %%
 
 class statesOfSimulation_object(object):
 
@@ -36,11 +35,6 @@ class statesOfSimulation_object(object):
 
         self.hf['x'] = np.zeros((26, self.hf['t'].size))
         self.hf['x'].attrs['about'] = 'States  d_rb[:3] d_rm[3:6] rb[6:9] rm[9:12] qb[12:16] qm[16:20] wb[20:23] wm[23:26]'
-        # # if 0:
-        # self.hf['f_norm'] = np.zeros(shape=(12, self.hf['t'].size - 1))
-        # self.hf['f_norm'].attrs['about'] = 'Vector of length of fibers. This vector differs of initial length.'
-        self.hf['u'] = np.zeros(shape=(6, self.hf['t'].size))
-        self.hf['u'].attrs['about'] = 'translation and rotation generalized forces.'
         self.hf['true_accel'] = np.zeros(shape=(3, self.hf['t'].size))
         self.hf['true_accel'].attrs['about'] = 'Exact acceleration'
         """ Relative deformation with respect of the initial length (l-l0)/l. """
@@ -55,13 +49,6 @@ class statesOfSimulation_object(object):
         self.hf.attrs['seismic_mass'] = accel.seismic_mass
         self.hf.attrs['fiber_length'] = accel.fiber_length
 
-        # """ Instance used on simulation"""
-
-    # def saveData(self, filename):
-    #     """Save data with Dill Package"""
-    #     with open(filename, "wb") as fp:
-    #         dill.dump(self, fp)
-    #     print("data save as " + filename)
 
 
 if __name__ == "__main__":
