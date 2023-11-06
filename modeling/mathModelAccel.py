@@ -659,10 +659,10 @@ class SimpleSolution(AccelModelInertialFrame):
             fiber_len: 12 dimenentional vector of current fiber lengths  
         '''
         if self.push_pull:
-            self.fiber_length_push_pull[0] = fiber_len[0]-fiber_len[2]
-            self.fiber_length_push_pull[1] = fiber_len[4]-fiber_len[6]
-            self.fiber_length_push_pull[2] = fiber_len[8]-fiber_len[10]
-            _r = self.fiber_length_push_pull
+            self.fiber_length_push_pull[0] = fiber_len[0]-fiber_len[3]
+            self.fiber_length_push_pull[1] = fiber_len[4]-fiber_len[7]
+            self.fiber_length_push_pull[2] = fiber_len[8]-fiber_len[11]
+            _r = self.fiber_length_push_pull#-2.0*self.fiber_length
             return self.k_by_m * _r
         else:
             _r = np.take(fiber_len, self.fibers_with_info_index)-self.fiber_length
