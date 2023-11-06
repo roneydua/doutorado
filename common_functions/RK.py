@@ -24,7 +24,7 @@ class RungeKutta(object):
         
 
 
-    def integrates_states(self, q, u, h):
+    def integrates_states(self, q: np.ndarray, u, h):
         
         """
         integrates_states
