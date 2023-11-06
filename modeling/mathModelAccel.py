@@ -561,7 +561,7 @@ class InverseProblem(AccelModelInertialFrame):
     # estimate f vector on B coordinate system
     norm_of_estimated_f_B = np.zeros((12, 1), dtype=np.float64)
 
-    def __init__(self, fibers_with_info: np.ndarray, recover_angular_accel=False, fiber_length=3e-3):
+    def __init__(self, fibers_with_info: np.ndarray, recover_angular_accel=False, fiber_length=3e-3,**kwarg):
         '''
         __init__ Contructor of inverse_problem. 
         Args:
@@ -576,9 +576,34 @@ class InverseProblem(AccelModelInertialFrame):
         self.fibers_with_info_index = fibers_with_info-1
         self.k_by_m = self.k/self.seismic_mass
         '''Ratio between stiffnes and mass to use on accel recover'''
+        
         if recover_angular_accel:
-            print('Not implemented yet.')
+            if 'full_estimation' in kwarg:
+                self.recover_type_flag = 'full_estimation'
+                # considers that the term q_M_B x r_m_B must be estimated 
+                _N = 10
+            else:
+                self.recover_type_flag = 'full_estimation_reduced'
+                # considers that the term q_M_B x r_m_B it is much smaller than the other terms 
+                _N = 7
+            self.var_xi = np.ones((self.fibers_with_info.size, _N))
+            self.var_gamma = np.zeros(_N)
+            self.var_psi = np.zeros(self.fibers_with_info.size)
+            # contruct the constant var_gamma matrix and solution of least squared
+            _aux_vector = np.ones((self.fibers_with_info.size, 3))
+            '''auxiliar vector to compute (m-b) with dimenstion fiber_with_sise by 3, used on var_xi and var_psi'''
+            self.aux_var_psi_matrix = np.zeros(self.fibers_with_info.size)
+            
+            for i, j in enumerate(self.fibers_with_info_index):
+                _aux_vector[i, :] = self.m_M[j, :] - self.b_B[j, :]
+                self.aux_var_psi_matrix[i] = _aux_vector[i, :].dot(
+                    _aux_vector[i, :])
+                self.var_xi[i, 1:4] = 2.0*(self.m_M[j, :] - 2.0*self.b_B[j, :])
+                self.var_xi[i, 4:7] = 4.0*self.m_M[j, :]
+                self.var_xi[i, 7:] = 4.0*self.m_M[j, :].cross(self.b_B[j, :])
+
         else:
+            self.recover_type_flag = 'linear_estimation'
             self.var_xi = np.ones((self.fibers_with_info.size, 4))
             self.var_gamma = np.zeros(4)
             self.var_psi = np.zeros(self.fibers_with_info.size)
@@ -591,12 +616,14 @@ class InverseProblem(AccelModelInertialFrame):
                 self.aux_var_psi_matrix[i] = _aux_vector[i, :].dot(
                     _aux_vector[i, :])
             self.var_xi[:, 1:] = 2.0*_aux_vector
-            if self.var_xi.shape[0] == self.var_gamma.size:
-                # in this case the least squared method use only the inverse matrix of var_gamma
-                self.least_square_matrix = np.linalg.inv(self.var_xi)
-            else:
-                # It is necessary compute pseud inverse of matrix
-                self.least_square_matrix = np.linalg.pinv(self.var_xi)
+            self.diff_m_M_b_B = self.m_M - self.b_B
+            
+        if self.var_xi.shape[0] == self.var_gamma.size:
+            # in this case the least squared method use only the inverse matrix of var_gamma
+            self.least_square_matrix = np.linalg.inv(self.var_xi)
+        else:
+            # It is necessary compute pseud inverse of matrix
+            self.least_square_matrix = np.linalg.pinv(self.var_xi)
 
             self.diff_m_M_b_B = self.m_M - self.b_B
 
@@ -609,6 +636,11 @@ class InverseProblem(AccelModelInertialFrame):
         self.var_psi = np.square(
             fiber_len)-self.aux_var_psi_matrix
         self.var_gamma = self.least_square_matrix @ self.var_psi
+        self.estimate_f_vector()
+        if self.recover_type_flag == 'linear_estimation':
+            return self.estimate_ddrm_B()
+        else: 
+            return self.estimate_ddrm_B(), self.estiamate_dw_B()
 
     def estimate_f_vector(self):
         '''
@@ -620,11 +652,19 @@ class InverseProblem(AccelModelInertialFrame):
         Returns:
             _description_ the estimate f vector (12,3)
         '''
-
-        for i in range(12):
-            self.estimated_f_B[i, :] = self.var_gamma[1:] + \
-                self.diff_m_M_b_B[i, :]
-        self.norm_of_estimated_f_B = np.linalg.norm(self.estimated_f_B, axis=1)
+        if self.recover_type_flag == 'linear_estimation':
+            for i in range(12):
+                self.estimated_f_B[i, :] = self.var_gamma[1:] + \
+                    self.diff_m_M_b_B[i, :]
+            self.norm_of_estimated_f_B = np.linalg.norm(self.estimated_f_B, axis=1)
+        elif self.recover_type_flag in ('full_estimation', 'full_estimation_reduced'):
+            ## compute relative attitude
+            self.estimated_q_M_B[1:] = self.var_gamma[-3:]
+            self.estimated_q_M_B[0] = np.linalg.norm(self.estimated_q_M_B[1:])
+            _rot_M_B = fq.rotationMatrix(self.estimated_q_M_B)
+            for i in range(12):
+                self.estimated_f_B[i, :] = self.var_gamma[1:] + _rot_M_B@self.m_M[i,:] - self.b_B[i,:]
+            self.norm_of_estimated_f_B = np.linalg.norm(self.estimated_f_B, axis=1)
 
     def estimate_ddrm_B(self):
         _t = np.zeros(3)
@@ -632,7 +672,9 @@ class InverseProblem(AccelModelInertialFrame):
             _t += ((self.norm_of_estimated_f_B[i]-self.fiber_length) /
                    self.norm_of_estimated_f_B[i])*self.estimated_f_B[i, :]
         return -self.k_by_m * _t
-
+    def estiamate_dw_B(self):
+        _Q_Im_k = self.k/self.inertial_seismic_mass_inv[0,0]*fq.matrixQ(self.estimated_q_M_B).T
+        return
 
 class SimpleSolution(AccelModelInertialFrame):
     """Implementação do método empregado no trabalho do Cazo."""
