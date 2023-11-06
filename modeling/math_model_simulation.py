@@ -12,6 +12,7 @@ from tqdm import tqdm
 import h5py
 import pandas as pd
 from modeling.mathModelAccel import AccelModelInertialFrame, InverseProblem, SimpleSolution
+from modeling.trajectories import Trajectory
 from common_functions.RK import RungeKutta
 from common_functions import funcoesQuaternion as fq
 
