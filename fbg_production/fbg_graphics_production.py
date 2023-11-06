@@ -9,6 +9,7 @@
 
 from common_functions.generic_functions import find_index_of_x_span, reflectivity_transmition
 import numpy as np
+from scipy.signal import butter,lfilter
 import locale
 import h5py
 import matplotlib.pyplot as plt
@@ -94,5 +95,73 @@ def plot_one_graphic(date:str):
     f.close()
     plt.savefig("fbg_production/"+date+".pdf", format="pdf")
     plt.close(fig=1)
+    
+    
+def plot_one_graphic_filtered(date: str):
+    f = h5py.File('production_files.hdf5', 'r')
+    ff = f['fbg_production/'+date]
+    # find index of fbgs
+    fbg_keys = list(ff.keys())
+    number_of_graphics = len(fbg_keys)
+    fig, ax = plt.subplots(1, 1, num=1, sharex=True, figsize=(FIG_L, 11))
+    i = 0
+    for i in fbg_keys:
+        index_min, index_max = find_index_of_x_span(
+            1540e-9, 1560e-9, ff[i+'/wavelength_m'][:])
+        # ax_count.set_title(i)
+        ## Filtering
+        filtered_date = butter(5,2.0,f[i+'/reflectivity'][:, -1]
+        
+        ax.plot(ff[i+'/wavelength_m'][:] *
+                1e9, ff[i+'/reflectivity'][:, -1], label=i)
+        ax.set_xlim(ff[i+'/wavelength_m'][index_min] *
+                    1e9, ff[i+'/wavelength_m'][index_max] *
+                    1e9)
+        ax.set_ylim(0, 1)
+    fig.supylabel('Refletividade')
+    _date = pd.to_datetime(date).strftime('%d de %B de %Y')
+    fig.suptitle("FBG produzidas em "+_date)
+    fig.supxlabel(r"$\lambda[\si{\nm}]$")
+    ax.legend(ncols=2)
+    f.close()
+    plt.savefig("fbg_production/"+date+".pdf", format="pdf")
+    plt.close(fig=1)
  
-plot_one_graphic('20231010')
+plot_one_graphic('20231031')
+# plot_production_one_collumn('20231030')
+
+
+# f = h5py.File('production_files.hdf5','a')
+# ff = f['fbg_production/20231031']
+
+# for i in list(ff.keys()):
+#     # print(i,ff[i+'/optical_power'].size)
+#     ff[i].create_dataset('optical_power_dbm', data=ff[i+'/optical_power'][:])
+#     ff[i].create_dataset('wavelength_m', data=ff[i+'/wavelength'][:])
+#     del ff[i+'/optical_power']
+#     del ff[i+'/wavelength']
+# f.close()
+
+
+
+
+
+# f = h5py.File('production_files.hdf5','a')
+# ff = f['fbg_production/20231031/fbg8']
+
+# t = ff['optical_power_dbm'][:, :10]
+# del ff['optical_power_dbm']
+# ff['optical_power_dbm']=t
+# t = ff['reflectivity'][:, :10]
+# del ff['reflectivity']
+# ff['reflectivity']=t
+
+# f.close()
+
+
+# f = h5py.File('production_files.hdf5','a')
+# ff = f['fbg_production/20231030/fbg2']
+
+# for i in range(4):
+#     ff['reflectivity'][:,i] = reflectivity_transmition(ff['optical_power_dbm'][:,0],ff['optical_power_dbm'][:,i])
+# f.close()
