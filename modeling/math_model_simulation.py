@@ -65,49 +65,10 @@ class statesOfSimulation_object(object):
 
 
 if __name__ == "__main__":
-    ft = 5.0 * np.pi
-    ft_y = 2.0 * np.pi
-    at = 1.0
-    at_y = 1.0
-    at_z = 9.89
-    tc = 3.0
-    ft_w_x = 1.0
-    ft_w_y = -1.0
-    ft_w_z = -1.0
-
-    def acceleration_value(time):
-        y = np.array([0.0, 0.0, 0.0])
-        y[0] = -at * (ft**2) * np.sin(ft * time)
-        y[1] = -at_y * (ft_y**2) * np.sin(ft_y * time)
-        y[2] = at_z * (1 - np.exp(-tc * time))
-        return y
-
-    def velocity_value(time):
-        y = np.array([0.0, 0.0, 0.0])
-        y[0] = at * ft * np.cos(ft * time)
-        y[1] = at_y * ft_y * np.cos(ft_y * time)
-        y[2] = at_z * (time + np.exp(-tc * time) / tc)
-        return y
-
-    def position_value(time):
-        y = np.array([0.0, 0.0, 0.0])
-        y[0] = at * np.sin(ft * time)
-        y[1] = at_y * np.sin(ft_y * time)
-        y[2] = at_z * (0.5 * time**2 - np.exp(-tc * time) / (tc**2))
-        return y
-
-    def angular_velocity_value(time):
-        y = np.array([0.0, 0.0, 0.0])
-        y[0] = (np.exp(-time)-1) * np.sin(ft*time)
-        y[1] = (np.exp(-time)-1) * np.cos(ft_y * time)
-        y[2] = np.exp(-time)-1
-        return y
-
-    accel = AccelModelInertialFrame(damper_for_computation_simulations=1e-6)
-    f = h5py.File('teste.hdf5', 'w')
-    ff = f.create_group('test_of_group')
-    s = statesOfSimulation_object(tf=1.0, dt=5e-6, hf=ff, accel=accel)
-    # save instance accel used on model
+    
+    
+    traj = Trajectory(s.hf['t'][:],test = 'linear')
+    # traj.plot_trajectories()                       
 
     RK = RungeKutta(s.hf['x'].shape[0], accel.dd_x_forced_body_state)
     # initial conditions for all quaternions as [1, 0, 0, 0]
@@ -117,13 +78,12 @@ if __name__ == "__main__":
     s.hf['x'][12:16, 0] = fq.eulerQuaternion(yaw=0, pitch=0, roll=0)  # qb
     s.hf['x'][16:20, 0] = fq.eulerQuaternion(yaw=0, pitch=0, roll=0)  # qm
     # Set body sensor and seismic mass initial conditions
-    s.hf['x'][:3, 0] = velocity_value(s.hf['t'][0])  # body velocity
-    s.hf['x'][3:6, 0] = velocity_value(s.hf['t'][0])  # seismic mass  velocity
-    s.hf['x'][6:9, 0] = position_value(s.hf['t'][0])  # body position
-    s.hf['x'][9:12, 0] = position_value(s.hf['t'][0])  # seismic mass position
-
-    s.hf['x'][20:23, 0] = angular_velocity_value(s.hf['t'][0])
-    s.hf['x'][23:, 0] = angular_velocity_value(s.hf['t'][0])
+    s.hf['x'][:3, 0] = traj.velocity_vector[:,0]  # body velocity
+    s.hf['x'][3:6, 0] = traj.velocity_vector[:,0]  # seismic mass  velocity
+    s.hf['x'][6:9, 0] = traj.position_vector[:,0]  # body position
+    s.hf['x'][9:12, 0] = traj.position_vector[:,0]  # seismic mass position
+    s.hf['x'][20:23, 0] = traj.angular_velocity_vector[:,0]
+    s.hf['x'][23:, 0] = traj.angular_velocity_vector[:,0]
 
     accel.update_states(rb=s.hf['x'][6:9, 0],
                         rm=s.hf['x'][9:12, 0],
@@ -143,30 +103,30 @@ if __name__ == "__main__":
             s.hf['x'][:, i], s.hf['u'][:, i], s.hf.attrs['dt'])
         # print(s.hf['x'][:, i + 1])
         # Put the body in specific trajectories
-        s.hf['x'][:3, i + 1] = velocity_value(s.hf['t'][i + 1])
-        s.hf['x'][6:9, i + 1] = position_value(s.hf['t'][i + 1])
-        s.hf['x'][20:23, i + 1] = angular_velocity_value(s.hf['t'][i + 1])
+        s.hf['x'][:3, i + 1] = traj.velocity_vector[:,i + 1]
+        s.hf['x'][6:9, i + 1] = traj.position_vector[:,i + 1]
+        s.hf['x'][20:23, i + 1] = traj.angular_velocity_vector[:,i + 1]
 
         s.hf['x'][12:16, i + 1] = fq.mult_quat(p=s.hf['x'][12:16, i], q=fq.expMap(
             s.hf['x'][20:23, i + 1], dt=s.hf.attrs['dt']))
+        
 
-        s.hf['true_accel'][:, i + 1] = acceleration_value(s.hf['t'][i + 1])
-        # print(s.hf['true_accel'][:, i + 1])
+        s.hf['true_accel'][:, i + 1] = traj.acceleration_vector[:,i + 1]
+        
+        
         # # update class structs to compute f vectors
         accel.update_states(rb=s.hf['x'][6:9, i + 1],
                             rm=s.hf['x'][9:12, i + 1],
                             qb=s.hf['x'][12:16, i + 1],
                             qm=s.hf['x'][16:20, i + 1])
+        ## take the f vector of integration
         s.hf['f'][:, :, i+1] = accel.f
         s.hf['fiber_len'][:, i+1] = np.linalg.norm(accel.f, axis=1)
+        
         # compute estimate rb_m
-        ip.compute_inverse_problem_solution(
+        ff['recover_accel_ls_simple'][:, i+1] = ip.compute_inverse_problem_solution(
             np.take(s.hf['fiber_len'][:, i+1], ip.fibers_with_info_index))
-        ip.estimate_f_vector()
-        ff['recover_accel_ls_simple'][:, i+1] = ip.estimate_ddrm_B()
+        
         ff['recover_accel_simple'][:, i+1] = ss.estimated_ddrm_B(
             ff['fiber_len'][:, i+1])
-    # f.close()
-    # s.saveData('data/vertical_acceleration.pickle')
-
     f.close()
