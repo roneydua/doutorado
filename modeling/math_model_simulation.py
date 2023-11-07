@@ -49,8 +49,6 @@ class statesOfSimulation_object(object):
         self.hf["f"] = np.zeros(shape=(12, 3, self.hf["t"].size))
         self.hf["fiber_len"] = np.zeros(shape=(12, self.hf["t"].size))
 
-        self.hf.create_dataset("recover_accel_simple", (3, ff["t"].size))
-        self.hf.create_dataset("recover_accel_ls_simple", (3, ff["t"].size))
         self.hf.attrs["b_B"] = accel.b_B
         self.hf.attrs["m_M"] = accel.m_M
         self.hf.attrs["k"] = accel.k
@@ -93,7 +91,7 @@ if __name__ == "__main__":
     s.hf["fiber_len"][:, 0] = np.linalg.norm(accel.f, axis=1)
 
     fibers_with_length_info = np.array([1, 4, 5, 8, 9, 12])
-    deformation = np.zeros((fibers_with_length_info.size, 1))
+    # deformation = np.zeros((fibers_with_length_info.size, 1))
     ip = InverseProblem(fibers_with_length_info, fiber_length=accel.fiber_length)
     ss = SimpleSolution(
         np.array([1, 5, 9]), fiber_length=accel.fiber_length, push_pull=True
@@ -126,12 +124,5 @@ if __name__ == "__main__":
         s.hf["f"][:, :, i + 1] = accel.f
         s.hf["fiber_len"][:, i + 1] = np.linalg.norm(accel.f, axis=1)
 
-        # compute estimate rb_m
-        ff["recover_accel_ls_simple"][:, i + 1] = ip.compute_inverse_problem_solution(
-            np.take(s.hf["fiber_len"][:, i + 1], ip.fibers_with_info_index)
-        )
-
-        ff["recover_accel_simple"][:, i + 1] = ss.estimated_ddrm_B(
-            ff["fiber_len"][:, i + 1]
-        )
+        
     f.close()
