@@ -74,10 +74,10 @@ if __name__ == "__main__":
     s.hf["x"][12:16, 0] = fq.eulerQuaternion(yaw=0, pitch=0, roll=0)  # qb
     s.hf["x"][16:20, 0] = fq.eulerQuaternion(yaw=0, pitch=0, roll=0)  # qm
     # Set body sensor and seismic mass initial conditions
-    s.hf["x"][:3, 0] = traj.velocity_vector[:, 0]  # body velocity
-    s.hf["x"][3:6, 0] = traj.velocity_vector[:, 0]  # seismic mass  velocity
-    s.hf["x"][6:9, 0] = traj.position_vector[:, 0]  # body position
-    s.hf["x"][9:12, 0] = traj.position_vector[:, 0]  # seismic mass position
+    s.hf["x"][:3, 0] = traj.velocity_vector_i[:, 0]  # body velocity
+    s.hf["x"][3:6, 0] = traj.velocity_vector_i[:, 0]  # seismic mass  velocity
+    s.hf["x"][6:9, 0] = traj.position_vector_i[:, 0]  # body position
+    s.hf["x"][9:12, 0] = traj.position_vector_i[:, 0]  # seismic mass position
     s.hf["x"][20:23, 0] = traj.angular_velocity_vector[:, 0]
     s.hf["x"][23:, 0] = traj.angular_velocity_vector[:, 0]
 
@@ -102,8 +102,8 @@ if __name__ == "__main__":
             s.hf["x"][:, i], u=None, h=s.hf.attrs["dt"]
         )
         # Put the body in specific trajectories
-        s.hf["x"][:3, i + 1] = traj.velocity_vector[:, i + 1]
-        s.hf["x"][6:9, i + 1] = traj.position_vector[:, i + 1]
+        s.hf["x"][:3, i + 1] = traj.velocity_vector_i[:, i + 1]
+        s.hf["x"][6:9, i + 1] = traj.position_vector_i[:, i + 1]
         s.hf["x"][20:23, i + 1] = traj.angular_velocity_vector[:, i + 1]
 
         s.hf["x"][12:16, i + 1] = fq.mult_quat(
@@ -111,7 +111,7 @@ if __name__ == "__main__":
             q=fq.expMap(s.hf["x"][20:23, i + 1], dt=s.hf.attrs["dt"]),
         )
 
-        s.hf["true_accel"][:, i + 1] = traj.acceleration_vector[:, i + 1]
+        s.hf["true_accel"][:, i + 1] = traj.acceleration_vector_i[:, i + 1]
 
         # # update class structs to compute f vectors
         accel.update_states(
