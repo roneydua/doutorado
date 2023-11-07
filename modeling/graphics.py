@@ -9,7 +9,7 @@ import numpy as np
 from IPython.core.interactiveshell import InteractiveShell
 from numpy import abs
 
-import common_functions.funcoesQuaternion as fq
+import common_functions.quaternion_functions as fq
 import common_functions.QuatSymbolic as qs
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")

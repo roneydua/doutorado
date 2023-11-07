@@ -9,6 +9,8 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from common_functions import quaternion_functions as fq
+
 
 class Trajectory(object):
     """docstring for Trajectory."""
@@ -24,7 +26,7 @@ class Trajectory(object):
         self.position_vector_i = np.zeros((3, self.n))
         ''' inertial position '''
         self.q_b_i = np.zeros((4, self.n))
-        ''' quaternion tranform inertial to body '''
+        ''' quaternion transform inertial to body '''
         # body states
         self.acceleration_vector_b = np.zeros((3, self.n))
         ''' body acceleration '''
@@ -69,7 +71,7 @@ class Trajectory(object):
             for idx, t in enumerate(self.time_vector):
                 self.acceleration_vector_i[:, idx] = self.acceleration_value(t)
                 # self.angular_velocity_vector[:,idx] = self.angular_velocity_value(t)
-            # set null values on firts block of y and z
+            # set null values on first block of y and z
             self.acceleration_vector_i[1, : self.idx_y] *= 0.0
             # set null values on second block of
             self.acceleration_vector_i[0, self.idx_y : self.idx_xy] *= 0.0

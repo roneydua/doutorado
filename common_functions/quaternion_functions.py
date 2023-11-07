@@ -9,14 +9,14 @@ from numpy import cos, sin
 
 
 def screw_matrix(v):
-    """Computa a matriz anti-simetrica a partir do v.
+    """ Computes the screw matrix from the v vector.
     Parameters
     ----------
-    @param vector or quaternio.
+    @param vector or quaternion.
 
     Returns
     -------
-    q_x : 3x3 matrix anti-simetrica
+    q_x : 3x3 screw-Matrix
     """
     q_x = np.zeros((3, 3))
     q_x[0, 1] = -v[-1]
@@ -130,7 +130,7 @@ def quat2Euler(q, deg=0):
 
 
 def rotationMatrix(q):
-    """Computa a matriz de rotacao a partir do quaternio de attitude.
+    """ Computa a matriz de rotacao a partir do quaternio de attitude.
 
     Parameters
     ----------

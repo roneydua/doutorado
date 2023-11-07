@@ -18,7 +18,7 @@ from modeling.mathModelAccel import (
 )
 from modeling.trajectories import Trajectory
 from common_functions.RK import RungeKutta
-from common_functions import funcoesQuaternion as fq
+from common_functions import quaternion_functions as fq
 
 import matplotlib.pyplot as plt
 
