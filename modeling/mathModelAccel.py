@@ -668,9 +668,10 @@ class InverseProblem(AccelModelInertialFrame):
             for i, j in enumerate(self.fibers_with_info_index):
                 _aux_vector[i, :] = self.m_M[j, :] - self.b_B[j, :]
                 self.aux_var_psi_matrix[i] = _aux_vector[i, :].dot(_aux_vector[i, :])
-                self.var_xi[i, 1:4] = 2.0 * (self.m_M[j, :] - 2.0 * self.b_B[j, :])
-                self.var_xi[i, 4:7] = 4.0 * self.m_M[j, :]
-                self.var_xi[i, 7:] = 4.0 * self.m_M[j, :].cross(self.b_B[j, :])
+                self.var_xi[i, 1:4] = 2.0 * (self.m_M[j, :] -  self.b_B[j, :])
+                if self.recover_type_flag == "full":
+                    self.var_xi[i, 4:7] = -4.0 * self.m_M[j, :]
+                self.var_xi[i, -3:] = -4.0 * np.cross(self.m_M[j, :], self.b_B[j, :])
 
         else:
             self.recover_type_flag = "linear_estimation"
@@ -725,11 +726,11 @@ class InverseProblem(AccelModelInertialFrame):
         elif self.recover_type_flag in ("full", "reduced"):
             ## compute relative attitude
             self.estimated_q_M_B[1:] = self.var_gamma[-3:]
-            self.estimated_q_M_B[0] = np.linalg.norm(self.estimated_q_M_B[1:])
+            self.estimated_q_M_B[0] = 1.0-np.linalg.norm(self.estimated_q_M_B[1:])
             _rot_M_B = fq.rotationMatrix(self.estimated_q_M_B)
             for i in range(12):
                 self.estimated_f_B[i, :] = (
-                    self.var_gamma[1:] + _rot_M_B @ self.m_M[i, :] - self.b_B[i, :]
+                    self.var_gamma[1:4] + _rot_M_B @ self.m_M[i, :] - self.b_B[i, :]
                 )
             self.norm_of_estimated_f_B = np.linalg.norm(self.estimated_f_B, axis=1)
 
