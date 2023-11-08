@@ -19,7 +19,7 @@ plt.style.use("common_functions/roney3.mplstyle")
 my_colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 FIG_L = 6.29
 
-def plot_production_one_collumn(date:str):
+def plot_production_one_column(date:str) -> None:
     f = h5py.File('production_files.hdf5','r')
     ff = f['fbg_production/'+date]
     # find index of fbgs
@@ -55,7 +55,7 @@ def plot_production_one_collumn(date:str):
     plt.close(fig=1)
 
 
-# plot_production_one_collumn('20231010')
+# plot_production_one_column('20231010')
 
 
 def loop_graphics():
@@ -63,7 +63,7 @@ def loop_graphics():
     ff = f['fbg_production/']
     fbg_keys = list(ff.keys())
     for i in fbg_keys:
-        plot_production_one_collumn(date=i)
+        plot_production_one_column(date=i)
     f.close()
     
 
@@ -110,7 +110,7 @@ def plot_one_graphic_filtered(date: str):
             1540e-9, 1560e-9, ff[i+'/wavelength_m'][:])
         # ax_count.set_title(i)
         ## Filtering
-        filtered_date = butter(5,2.0,f[i+'/reflectivity'][:, -1]
+        # filtered_date = butter(5,2.0,f[i+'/reflectivity'][:, -1]
         
         ax.plot(ff[i+'/wavelength_m'][:] *
                 1e9, ff[i+'/reflectivity'][:, -1], label=i)
@@ -128,7 +128,7 @@ def plot_one_graphic_filtered(date: str):
     plt.close(fig=1)
  
 plot_one_graphic('20231031')
-# plot_production_one_collumn('20231030')
+# plot_production_one_column('20231030')
 
 
 # f = h5py.File('production_files.hdf5','a')
