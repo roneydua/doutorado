@@ -783,7 +783,7 @@ class SimpleSolution(AccelModelInertialFrame):
         self.coef_differential = 2.0 * self.k / self.seismic_mass
         """Coefficient to compute accel with differential method"""
 
-    def estimated_ddrm_B(self, fiber_len: np.ndarray, method: string):
+    def estimated_ddrm_B(self, fiber_len: np.ndarray, method: str):
         """
         estimated_ddrm_B Estimatio  n of accel with no cross effects
         This method use the fibers_with_info_index variables to extract correct dimensions
@@ -793,16 +793,18 @@ class SimpleSolution(AccelModelInertialFrame):
         """
         if method == "one_fiber":
             _r = np.take(fiber_len, self.fibers_with_info_index) - self.fiber_length
-            return self.k_by_m * _r
+            return self.coef_one_fiber * _r
         elif method == "differential_aligned":
-            self.fiber_length_push_pull[0] = fiber_len[0] - fiber_len[2]
-            self.fiber_length_push_pull[1] = fiber_len[4] - fiber_len[6]
-            self.fiber_length_push_pull[2] = fiber_len[8] - fiber_len[10]
-            _r = self.fiber_length_push_pull  # -2.0*self.fiber_length
-            return self.k_by_m * _r
+            _fiber_length_push_pull = np.zeros(3)
+            _fiber_length_push_pull[0] = fiber_len[0] - fiber_len[2]
+            _fiber_length_push_pull[1] = fiber_len[4] - fiber_len[6]
+            _fiber_length_push_pull[2] = fiber_len[8] - fiber_len[10]
+            _r = _fiber_length_push_pull  # -2.0*self.fiber_length
+            return self.coef_differential * _r
         elif method == "differential_cross":
-            self.fiber_length_push_pull[0] = fiber_len[0] - fiber_len[3]
-            self.fiber_length_push_pull[1] = fiber_len[4] - fiber_len[7]
-            self.fiber_length_push_pull[2] = fiber_len[8] - fiber_len[11]
-            _r = self.fiber_length_push_pull  # -2.0*self.fiber_length
-            return self.k_by_m * _r
+            _fiber_length_push_pull = np.zeros(3)
+            _fiber_length_push_pull[0] = fiber_len[0] - fiber_len[3]
+            _fiber_length_push_pull[1] = fiber_len[4] - fiber_len[7]
+            _fiber_length_push_pull[2] = fiber_len[8] - fiber_len[11]
+            _r = _fiber_length_push_pull  # -2.0*self.fiber_length
+            return self.coef_differential * _r
