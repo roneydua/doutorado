@@ -36,10 +36,13 @@ class Trajectory(object):
         self.acceleration_vector_b = np.zeros((3, self.n))
         """ body acceleration """
         self.velocity_vector_b = np.zeros((3, self.n))
-        """ body acceleration """
+        """ body velocity """
         self.position_vector_b = np.zeros((3, self.n))
+        """ body position """
+        self.angular_velocity_vector_b = np.zeros((3, self.n))
+        """ body velocity """
+        self.angular_acceleration_vector_b = np.zeros((3, self.n))
         """ body acceleration """
-        self.angular_velocity_vector = np.zeros((3, self.n))
         # find time indexes
         self.ft = 100.0 * 2.0 * np.pi
         self.ft_y = 50 * 2.0 * np.pi
@@ -82,7 +85,8 @@ class Trajectory(object):
             self.idx_xyz = self.n
         for idx, t in enumerate(self.time_vector):
             self.acceleration_vector_i[:, idx] = self.acceleration_value(t)
-            self.angular_velocity_vector[:, idx] = self.angular_velocity_value(t)
+            self.angular_velocity_vector_b[:, idx] = self.angular_velocity_value(t)
+            self.angular_acceleration_vector_b[:, idx] = self.angular_acceleration_value(t)
         # set null values on first block of y and z
         self.acceleration_vector_i[1, : self.idx_y] *= 0.0
         # set null values on second block of
@@ -99,7 +103,7 @@ class Trajectory(object):
             ) * 0.5 * (self.time_vector[idx + 1] - self.time_vector[idx])
             self.q_b_i[:, idx + 1] = fq.mult_quat(
                 p=self.q_b_i[:, idx],
-                q=fq.expMap(self.angular_velocity_vector[:, idx], dt=dt),
+                q=fq.expMap(self.angular_velocity_vector_b[:, idx], dt=dt),
             )
             self.acceleration_vector_b[:, idx + 1] = (
                 fq.rotationMatrix(self.q_b_i[:, idx + 1])
@@ -127,6 +131,16 @@ class Trajectory(object):
         y[2] = self.at_z * (0.5 * time**2 - np.exp(-self.tc * time) / (self.tc**2))
         return y
 
+    def angular_acceleration_value(self, time: float):
+        y = np.array([0.0, 0.0, 0.0])
+        # y[0] = aw_x*(np.exp(-time)-1) * np.sin(ft*time)
+        # y[1] = aw_y*(np.exp(-time)-1) * np.cos(ft_y * time)
+        # y[2] = aw_z*(np.exp(-time)-1)
+        y[0] = self.ft_w_x * self.aw_x * np.cos(self.ft_w_x * time)
+        y[1] = self.ft_w_y * self.aw_y * np.cos(self.ft_w_y * time)
+        y[2] = self.ft_w_z * self.aw_z * np.cos(self.ft_w_z * time)
+        return y
+
     def angular_velocity_value(self, time: float):
         y = np.array([0.0, 0.0, 0.0])
         # y[0] = aw_x*(np.exp(-time)-1) * np.sin(ft*time)
@@ -150,32 +164,32 @@ class Trajectory(object):
         fig.supylabel("aceleração")
         fig.supxlabel(r"Tempo, [$\unit{\ms}$]")
         ax[0].plot(
-            1e6 * self.time_vector,
+            1e3 * self.time_vector,
             self.acceleration_vector_i[0, :],
             label=r"Sistema $\mathcal{I}$",
         )
         ax[1].plot(
-            1e6 * self.time_vector,
+            1e3 * self.time_vector,
             self.acceleration_vector_i[1, :],
             label=r"Sistema $\mathcal{I}$",
         )
         ax[2].plot(
-            1e6 * self.time_vector,
+            1e3 * self.time_vector,
             self.acceleration_vector_i[2, :],
             label=r"Sistema $\mathcal{I}$",
         )
         ax[0].plot(
-            1e6 * self.time_vector,
+            1e3 * self.time_vector,
             self.acceleration_vector_b[0, :],
             label=r"Sistema $\mathcal{B}$",
         )
         ax[1].plot(
-            1e6 * self.time_vector,
+            1e3 * self.time_vector,
             self.acceleration_vector_b[1, :],
             label=r"Sistema $\mathcal{B}$",
         )
         ax[2].plot(
-            1e6 * self.time_vector,
+            1e3 * self.time_vector,
             self.acceleration_vector_b[2, :],
             label=r"Sistema $\mathcal{B}$",
         )
@@ -187,9 +201,9 @@ class Trajectory(object):
 
         fig.supylabel("velocidade")
         fig.supxlabel(r"Tempo, [$\unit{\ms}$]")
-        ax[0].plot(1e6 * self.time_vector, self.velocity_vector_i[0, :])
-        ax[1].plot(1e6 * self.time_vector, self.velocity_vector_i[1, :])
-        ax[2].plot(1e6 * self.time_vector, self.velocity_vector_i[2, :])
+        ax[0].plot(1e3 * self.time_vector, self.velocity_vector_i[0, :])
+        ax[1].plot(1e3 * self.time_vector, self.velocity_vector_i[1, :])
+        ax[2].plot(1e3 * self.time_vector, self.velocity_vector_i[2, :])
 
         plt.show()
 
@@ -198,9 +212,9 @@ class Trajectory(object):
 
         fig.supylabel("posição")
         fig.supxlabel(r"Tempo, [$\unit{\ms}$]")
-        ax[0].plot(1e6 * self.time_vector, self.position_vector_i[0, :])
-        ax[1].plot(1e6 * self.time_vector, self.position_vector_i[1, :])
-        ax[2].plot(1e6 * self.time_vector, self.position_vector_i[2, :])
+        ax[0].plot(1e3 * self.time_vector, self.position_vector_i[0, :])
+        ax[1].plot(1e3 * self.time_vector, self.position_vector_i[1, :])
+        ax[2].plot(1e3 * self.time_vector, self.position_vector_i[2, :])
 
         plt.show()
 
@@ -209,15 +223,24 @@ class Trajectory(object):
 
         fig.supylabel("velocidade angular")
         fig.supxlabel(r"Tempo, [$\unit{\ms}$]")
-        ax[0].plot(1e6 * self.time_vector, self.angular_velocity_vector[0, :])
-        ax[1].plot(1e6 * self.time_vector, self.angular_velocity_vector[1, :])
-        ax[2].plot(1e6 * self.time_vector, self.angular_velocity_vector[2, :])
+        ax[0].plot(1e3 * self.time_vector, self.angular_velocity_vector_b[0, :])
+        ax[1].plot(1e3 * self.time_vector, self.angular_velocity_vector_b[1, :])
+        ax[2].plot(1e3 * self.time_vector, self.angular_velocity_vector_b[2, :])
+
+    def plot_angular_acceleration(self):
+        fig, ax = plt.subplots(3, 1, num=5, sharex=True, figsize=(FIG_L, FIG_A))
+
+        fig.supylabel(r"$\dot{\mathbf{\omega} [\unit{\radian\per\squared\second}]$")
+        fig.supxlabel(r"Tempo, [$\unit{\ms}$]")
+        ax[0].plot(1e3 * self.time_vector, self.angular_angular_vector_b[0, :])
+        ax[1].plot(1e3 * self.time_vector, self.angular_angular_vector_b[1, :])
+        ax[2].plot(1e3 * self.time_vector, self.angular_angular_vector_b[2, :])
 
     def plot_quaternion(self):
-        fig, ax = plt.subplots(4, 1, num=5, sharex=True, figsize=(FIG_L, FIG_A))
+        fig, ax = plt.subplots(4, 1, num=6, sharex=True, figsize=(FIG_L, FIG_A))
         fig.supxlabel(r"Tempo, $[\unit{\ms}]$")
         fig.supylabel("quatérnion")
-        ax[0].plot(1e6 * self.time_vector, self.q_b_i[0, :])
-        ax[1].plot(1e6 * self.time_vector, self.q_b_i[1, :])
-        ax[2].plot(1e6 * self.time_vector, self.q_b_i[2, :])
-        ax[3].plot(1e6 * self.time_vector, self.q_b_i[3, :])
+        ax[0].plot(1e3 * self.time_vector, self.q_b_i[0, :])
+        ax[1].plot(1e3 * self.time_vector, self.q_b_i[1, :])
+        ax[2].plot(1e3 * self.time_vector, self.q_b_i[2, :])
+        ax[3].plot(1e3 * self.time_vector, self.q_b_i[3, :])
