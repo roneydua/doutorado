@@ -1,4 +1,12 @@
 {
     "python.analysis.extraPaths": ["${workspaceFolder}/"],
-    "pylint.importStrategy": "fromEnvironment"
+    "pylint.importStrategy": "fromEnvironment",
+    "cSpell.enableFiletypes": [
+        "python"
+    ],
+    "cSpell.words": [
+        "ddrm",
+        "dfdq",
+        "mult"
+    ]
 }
