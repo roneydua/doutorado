@@ -646,14 +646,17 @@ class InverseProblem(AccelModelInertialFrame):
         """Ratio between stiffness and mass to use on accel recover"""
 
         if recover_angular_accel:
-            if "full_estimation" in kwarg:
-                self.recover_type_flag = "full_estimation"
+            if "full" == kwarg["estimation"]:
+                self.recover_type_flag = "full"
                 # considers that the term q_M_B x r_m_B must be estimated
                 _N = 10
-            else:
-                self.recover_type_flag = "full_estimation_reduced"
+            elif "reduced" == kwarg["estimation"]:
+                self.recover_type_flag = "reduced"
                 # considers that the term q_M_B x r_m_B it is much smaller than the other terms
                 _N = 7
+            else:
+                print("not recognized recovery")
+                quit()
             self.var_xi = np.ones((self.fibers_with_info.size, _N))
             self.var_gamma = np.zeros(_N)
             self.var_psi = np.zeros(self.fibers_with_info.size)
@@ -719,7 +722,7 @@ class InverseProblem(AccelModelInertialFrame):
             for i in range(12):
                 self.estimated_f_B[i, :] = self.var_gamma[1:] + self.diff_m_M_b_B[i, :]
             self.norm_of_estimated_f_B = np.linalg.norm(self.estimated_f_B, axis=1)
-        elif self.recover_type_flag in ("full_estimation", "full_estimation_reduced"):
+        elif self.recover_type_flag in ("full", "reduced"):
             ## compute relative attitude
             self.estimated_q_M_B[1:] = self.var_gamma[-3:]
             self.estimated_q_M_B[0] = np.linalg.norm(self.estimated_q_M_B[1:])
@@ -740,12 +743,22 @@ class InverseProblem(AccelModelInertialFrame):
         return -self.k_by_m * _t
 
     def estiamate_dw_B(self):
+        _t = np.zeros(4)
         _Q_Im_k = (
             self.k
             / self.inertial_seismic_mass_inv[0, 0]
             * fq.matrixQ(self.estimated_q_M_B).T
         )
-        return
+        for i in range(12):
+            _t += (
+                (
+                    (self.norm_of_estimated_f_B[i] - self.fiber_length)
+                    / self.norm_of_estimated_f_B[i]
+                )
+                * fq.calc_dfdq(v=self.estimated_f_B[i,:],q=self.estimated_q_M_B)
+                @ self.estimated_f_B[i, :]
+            )
+        return _Q_Im_k@_t
 
 
 class SimpleSolution(AccelModelInertialFrame):

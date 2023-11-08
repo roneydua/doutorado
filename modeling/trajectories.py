@@ -11,6 +11,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from common_functions import quaternion_functions as fq
 
+plt.style.use("common_functions/roney3.mplstyle")
+FIG_L = 6.29
+FIG_A = (90.0) / 25.4
+
 
 class Trajectory(object):
     """docstring for Trajectory."""
@@ -18,106 +22,89 @@ class Trajectory(object):
     def __init__(self, time_vector: np.ndarray, **kwargs):
         self.time_vector = time_vector
         self.n = time_vector.size
-        #inertial states
+        # inertial states
         self.acceleration_vector_i = np.zeros((3, self.n))
-        ''' inertial acceleration '''
+        """ inertial acceleration """
         self.velocity_vector_i = np.zeros((3, self.n))
-        ''' inertial velocity '''
+        """ inertial velocity """
         self.position_vector_i = np.zeros((3, self.n))
-        ''' inertial position '''
+        """ inertial position """
         self.q_b_i = np.zeros((4, self.n))
-        ''' quaternion transform inertial to body '''
+        self.q_b_i[0, :] = 1.0
+        """ quaternion transform inertial to body """
         # body states
         self.acceleration_vector_b = np.zeros((3, self.n))
-        ''' body acceleration '''
+        """ body acceleration """
         self.velocity_vector_b = np.zeros((3, self.n))
-        ''' body acceleration '''
+        """ body acceleration """
         self.position_vector_b = np.zeros((3, self.n))
-        ''' body acceleration '''
+        """ body acceleration """
         self.angular_velocity_vector = np.zeros((3, self.n))
         # find time indexes
-        if kwargs["test"] == "linear_trigonometric":
+        self.ft = 100.0 * 2.0 * np.pi
+        self.ft_y = 50 * 2.0 * np.pi
+
+        self.at = 150.0 / self.ft**2.0
+        self.at_y = 150.0 / self.ft_y**2
+        self.at_z = 10.0
+
+        self.tc = 300.0
+
+        self.ft_w_x = 10.0 * 2.0 * np.pi
+        self.ft_w_y = -10.0 * 2.0 * np.pi
+        self.ft_w_z = 20.0 * 2.0 * np.pi
+        if kwargs["test"] == "translational_movement":
             print("Linear pure trajectory")
-            self.ft = 100.0 * 2.0 * np.pi
-            self.ft_y = 50 * 2.0 * np.pi
+            self.aw_x = self.aw_y = self.aw_z = 0.0
+        else:
+            print("Linear and angular trajectory")
+            self.aw_x = 10.0
+            self.aw_y = 20.0
+            self.aw_z = 30.0
 
-            self.at = 150.0 / self.ft**2.0
-            self.at_y = 150.0 / self.ft_y**2
-            self.at_z = 10.0
-
-            self.tc = 3000.0
-
-            self.ft_w_x = 10.0 * 2.0 * np.pi
-            self.ft_w_y = -1.0 * 2.0 * np.pi
-            self.ft_w_z = -1.0 * 2.0 * np.pi
-
-            self.aw_x = 2.0
-            self.aw_y = 2.0
-            self.aw_z = 3.0
-            
-            
-            try:
-                self.idx_y = np.where(self.time_vector > 2.0 *(2.0*np.pi)/ self.ft)[0][0]
-            except IndexError:
-                self.idx_y = self.n
-            try:
-                self.idx_xy = np.where(self.time_vector > 3.0 *(2.0*np.pi)/ self.ft_y)[0][0]
-            except IndexError:
-                self.idx_xy = self.n
-            try:
-                self.idx_xyz = np.where(self.time_vector > 5.0 *(2.0*np.pi)/ self.ft_y)[0][0]
-            except IndexError:
-                self.idx_xyz = self.n
-            for idx, t in enumerate(self.time_vector):
-                self.acceleration_vector_i[:, idx] = self.acceleration_value(t)
-                # self.angular_velocity_vector[:,idx] = self.angular_velocity_value(t)
-            # set null values on first block of y and z
-            self.acceleration_vector_i[1, : self.idx_y] *= 0.0
-            # set null values on second block of
-            self.acceleration_vector_i[0, self.idx_y : self.idx_xy] *= 0.0
-            # self.acceleration_vector[2, self.idx_y : self.idx_xy] *= 0.0
-            # set null values on third block
-            # self.acceleration_vector[2, self.idx_xy : self.idx_xyz] *= 0.0
-            # integration with trap
-            for idx in range(self.n-1):
-                self.velocity_vector_i[:,idx+1] = self.velocity_vector_i[:,idx]+(self.acceleration_vector_i[:,idx]+self.acceleration_vector_i[:,idx+1])*0.5*(self.time_vector[idx+1]-self.time_vector[idx])
-                self.position_vector_i[:,idx+1] = self.position_vector_i[:,idx]+(self.velocity_vector_i[:,idx]+self.velocity_vector_i[:,idx+1])*0.5*(self.time_vector[idx+1]-self.time_vector[idx])
-        elif kwargs["test"] == "linear_exp":
-            print("Linear pure trajectory with exponential perfil")
-            self.ft = 1.0 * 2.0 * np.pi
-            self.ft_y = .50 * 2.0 * np.pi
-
-            self.at = 0.#150.0 / self.ft**2.0
-            self.at_y = 0.#150.0 / self.ft_y**2
-            self.at_z = 150.0
-
-            self.tc = 100.0
-
-            self.ft_w_x = 10.0 * 2.0 * np.pi
-            self.ft_w_y = -1.0 * 2.0 * np.pi
-            self.ft_w_z = -1.0 * 2.0 * np.pi
-
-            self.aw_x = 2.0
-            self.aw_y = 2.0
-            self.aw_z = 3.0
-            # find time indexes
-            try:
-                self.idx_y = np.where(self.time_vector > 2.0 *(2.0*np.pi)/ self.ft)[0][0]
-            except IndexError:
-                self.idx_y = self.n
-            try:
-                self.idx_xy = np.where(self.time_vector > 3.0 *(2.0*np.pi)/ self.ft_y)[0][0]
-            except IndexError:
-                self.idx_xy = self.n
-            try:
-                self.idx_xyz = np.where(self.time_vector > 5.0 *(2.0*np.pi)/ self.ft_y)[0][0]
-            except IndexError:
-                self.idx_xyz = self.n
-            for idx, t in enumerate(self.time_vector):
-                self.acceleration_vector_i[:, idx] = self.acceleration_value(t)
-                self.velocity_vector_i[:, idx] = self.velocity_value(t)
-                self.position_vector_i[:, idx] = self.position_value(t)
-
+        try:
+            self.idx_y = np.where(self.time_vector > 2.0 * (2.0 * np.pi) / self.ft)[0][
+                0
+            ]
+        except IndexError:
+            self.idx_y = self.n
+        try:
+            self.idx_xy = np.where(self.time_vector > 3.0 * (2.0 * np.pi) / self.ft_y)[
+                0
+            ][0]
+        except IndexError:
+            self.idx_xy = self.n
+        try:
+            self.idx_xyz = np.where(self.time_vector > 5.0 * (2.0 * np.pi) / self.ft_y)[
+                0
+            ][0]
+        except IndexError:
+            self.idx_xyz = self.n
+        for idx, t in enumerate(self.time_vector):
+            self.acceleration_vector_i[:, idx] = self.acceleration_value(t)
+            self.angular_velocity_vector[:, idx] = self.angular_velocity_value(t)
+        # set null values on first block of y and z
+        self.acceleration_vector_i[1, : self.idx_y] *= 0.0
+        # set null values on second block of
+        self.acceleration_vector_i[0, self.idx_y : self.idx_xy] *= 0.0
+        # integration with trap
+        dt = self.time_vector[1] - self.time_vector[0]
+        for idx in range(self.n - 1):
+            self.velocity_vector_i[:, idx + 1] = self.velocity_vector_i[:, idx] + (
+                self.acceleration_vector_i[:, idx]
+                + self.acceleration_vector_i[:, idx + 1]
+            ) * 0.5 * (self.time_vector[idx + 1] - self.time_vector[idx])
+            self.position_vector_i[:, idx + 1] = self.position_vector_i[:, idx] + (
+                self.velocity_vector_i[:, idx] + self.velocity_vector_i[:, idx + 1]
+            ) * 0.5 * (self.time_vector[idx + 1] - self.time_vector[idx])
+            self.q_b_i[:, idx + 1] = fq.mult_quat(
+                p=self.q_b_i[:, idx],
+                q=fq.expMap(self.angular_velocity_vector[:, idx], dt=dt),
+            )
+            self.acceleration_vector_b[:, idx + 1] = (
+                fq.rotationMatrix(self.q_b_i[:, idx + 1])
+                @ self.acceleration_vector_i[:, idx]
+            )
 
     def acceleration_value(self, time: float):
         y = np.array([0.0, 0.0, 0.0])
@@ -145,32 +132,92 @@ class Trajectory(object):
         # y[0] = aw_x*(np.exp(-time)-1) * np.sin(ft*time)
         # y[1] = aw_y*(np.exp(-time)-1) * np.cos(ft_y * time)
         # y[2] = aw_z*(np.exp(-time)-1)
-        y[0] = self.aw_x * np.sin(self.ft * time)
-        y[1] = self.aw_y * np.sin(self.ft_y * time)
-        y[2] = self.aw_z * np.sin(self.ft_y * time)
+        y[0] = self.aw_x * np.sin(self.ft_w_x * time)
+        y[1] = self.aw_y * np.sin(self.ft_w_y * time)
+        y[2] = self.aw_z * np.sin(self.ft_w_z * time)
         return y
 
     def plot_trajectories(self):
-        plt.figure()
-        plt.ylabel('aceleração')
-        plt.plot(self.time_vector,self.acceleration_vector_i[0,:],'.')
-        plt.plot(self.time_vector,self.acceleration_vector_i[1,:],'.')
-        plt.plot(self.time_vector,self.acceleration_vector_i[2,:],'.')
+        self.plot_acceleration()
+        self.plot_position()
+        self.plot_velocity()
+        self.plot_quaternion()
+        self.plot_angular_velocity()
+
+    def plot_acceleration(self):
+        fig, ax = plt.subplots(3, 1, num=1, sharex=True, figsize=(FIG_L, FIG_A))
+
+        fig.supylabel("aceleração")
+        fig.supxlabel(r"Tempo, [$\unit{\ms}$]")
+        ax[0].plot(
+            1e6 * self.time_vector,
+            self.acceleration_vector_i[0, :],
+            label=r"Sistema $\mathcal{I}$",
+        )
+        ax[1].plot(
+            1e6 * self.time_vector,
+            self.acceleration_vector_i[1, :],
+            label=r"Sistema $\mathcal{I}$",
+        )
+        ax[2].plot(
+            1e6 * self.time_vector,
+            self.acceleration_vector_i[2, :],
+            label=r"Sistema $\mathcal{I}$",
+        )
+        ax[0].plot(
+            1e6 * self.time_vector,
+            self.acceleration_vector_b[0, :],
+            label=r"Sistema $\mathcal{B}$",
+        )
+        ax[1].plot(
+            1e6 * self.time_vector,
+            self.acceleration_vector_b[1, :],
+            label=r"Sistema $\mathcal{B}$",
+        )
+        ax[2].plot(
+            1e6 * self.time_vector,
+            self.acceleration_vector_b[2, :],
+            label=r"Sistema $\mathcal{B}$",
+        )
+        ax[2].legend()
         plt.show()
-        plt.figure()
-        plt.ylabel('velocidade')
-        plt.plot(self.time_vector,self.velocity_vector_i[0,:],'.')
-        plt.plot(self.time_vector,self.velocity_vector_i[1,:],'.')
-        plt.plot(self.time_vector,self.velocity_vector_i[2,:],'.')
+
+    def plot_velocity(self):
+        fig, ax = plt.subplots(3, 1, num=2, sharex=True, figsize=(FIG_L, FIG_A))
+
+        fig.supylabel("velocidade")
+        fig.supxlabel(r"Tempo, [$\unit{\ms}$]")
+        ax[0].plot(1e6 * self.time_vector, self.velocity_vector_i[0, :])
+        ax[1].plot(1e6 * self.time_vector, self.velocity_vector_i[1, :])
+        ax[2].plot(1e6 * self.time_vector, self.velocity_vector_i[2, :])
+
         plt.show()
-        plt.figure()
-        plt.ylabel('posição')
-        plt.plot(self.time_vector,self.position_vector_i[0,:],'.')
-        plt.plot(self.time_vector,self.position_vector_i[1,:],'.')
-        plt.plot(self.time_vector,self.position_vector_i[2,:],'.')
+
+    def plot_position(self):
+        fig, ax = plt.subplots(3, 1, num=3, sharex=True, figsize=(FIG_L, FIG_A))
+
+        fig.supylabel("posição")
+        fig.supxlabel(r"Tempo, [$\unit{\ms}$]")
+        ax[0].plot(1e6 * self.time_vector, self.position_vector_i[0, :])
+        ax[1].plot(1e6 * self.time_vector, self.position_vector_i[1, :])
+        ax[2].plot(1e6 * self.time_vector, self.position_vector_i[2, :])
+
         plt.show()
-        plt.figure()
-        plt.ylabel('posição')
-        plt.plot(self.time_vector,self.angular_velocity_vector[0,:],'.')
-        plt.plot(self.time_vector,self.angular_velocity_vector[1,:],'.')
-        plt.plot(self.time_vector,self.angular_velocity_vector[2,:],'.')
+
+    def plot_angular_velocity(self):
+        fig, ax = plt.subplots(3, 1, num=4, sharex=True, figsize=(FIG_L, FIG_A))
+
+        fig.supylabel("velocidade angular")
+        fig.supxlabel(r"Tempo, [$\unit{\ms}$]")
+        ax[0].plot(1e6 * self.time_vector, self.angular_velocity_vector[0, :])
+        ax[1].plot(1e6 * self.time_vector, self.angular_velocity_vector[1, :])
+        ax[2].plot(1e6 * self.time_vector, self.angular_velocity_vector[2, :])
+
+    def plot_quaternion(self):
+        fig, ax = plt.subplots(4, 1, num=5, sharex=True, figsize=(FIG_L, FIG_A))
+        fig.supxlabel(r"Tempo, $[\unit{\ms}]$")
+        fig.supylabel("quatérnion")
+        ax[0].plot(1e6 * self.time_vector, self.q_b_i[0, :])
+        ax[1].plot(1e6 * self.time_vector, self.q_b_i[1, :])
+        ax[2].plot(1e6 * self.time_vector, self.q_b_i[2, :])
+        ax[3].plot(1e6 * self.time_vector, self.q_b_i[3, :])

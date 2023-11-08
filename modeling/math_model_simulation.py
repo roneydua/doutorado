@@ -43,8 +43,10 @@ class statesOfSimulation_object(object):
         self.hf["x"].attrs[
             "about"
         ] = "States  d_rb[:3] d_rm[3:6] rb[6:9] rm[9:12] qb[12:16] qm[16:20] wb[20:23] wm[23:26]"
-        self.hf["true_accel"] = np.zeros(shape=(3, self.hf["t"].size))
-        self.hf["true_accel"].attrs["about"] = "Exact acceleration"
+        self.hf["true_accel_i"] = np.zeros(shape=(3, self.hf["t"].size))
+        self.hf["true_accel_i"].attrs["about"] = "Exact acceleration on inertial frame"
+        self.hf["true_accel_b"] = np.zeros(shape=(3, self.hf["t"].size))
+        self.hf["true_accel_b"].attrs["about"] = "Exact acceleration on body frame"
         """ Relative deformation with respect of the initial length (l-l0)/l. """
         self.hf["f"] = np.zeros(shape=(12, 3, self.hf["t"].size))
         self.hf["fiber_len"] = np.zeros(shape=(12, self.hf["t"].size))
@@ -58,12 +60,17 @@ class statesOfSimulation_object(object):
 
 if __name__ == "__main__":
     accel = AccelModelInertialFrame(
-        damper_for_computation_simulations=0.0, fiber_length=3e-3
+        damper_for_computation_simulations=5.0, fiber_length=3e-3
     )
-    f = h5py.File("modeling_data_4.hdf5", "w")
-    ff = f.require_group("pure_translational_movement")
-    s = statesOfSimulation_object(tf=0.3, dt=5e-5, hf=ff, accel=accel)
-    traj = Trajectory(s.hf["t"][:], test="linear")
+    hdf5_file = "modeling_data.hdf5"
+    test_name = "complete_movement"
+    # test_name = "translational_movement"
+    f = h5py.File(hdf5_file, "a")
+    if test_name in f.keys():
+        del f[test_name]
+    ff = f.require_group(test_name)
+    s = statesOfSimulation_object(tf=0.75, dt=1e-5, hf=ff, accel=accel)
+    traj = Trajectory(s.hf["t"][:], test=test_name)
     # traj.plot_trajectories()
 
     RK = RungeKutta(s.hf["x"].shape[0], accel.dd_x_forced_body_state)
@@ -92,10 +99,10 @@ if __name__ == "__main__":
 
     fibers_with_length_info = np.array([1, 4, 5, 8, 9, 12])
     # deformation = np.zeros((fibers_with_length_info.size, 1))
-    ip = InverseProblem(fibers_with_length_info, fiber_length=accel.fiber_length)
-    ss = SimpleSolution(
-        np.array([1, 5, 9]), fiber_length=accel.fiber_length, push_pull=True
-    )
+    # ip = InverseProblem(fibers_with_length_info, fiber_length=accel.fiber_length)
+    # ss = SimpleSolution(
+    # np.array([1, 5, 9]), fiber_length=accel.fiber_length, push_pull=True
+    # )
     for i in tqdm(range(s.hf["t"].size - 1)):
         # integration of states
         s.hf["x"][:, i + 1] = RK.integrates_states(
@@ -111,7 +118,8 @@ if __name__ == "__main__":
             q=fq.expMap(s.hf["x"][20:23, i + 1], dt=s.hf.attrs["dt"]),
         )
 
-        s.hf["true_accel"][:, i + 1] = traj.acceleration_vector_i[:, i + 1]
+        s.hf["true_accel_i"][:, i + 1] = traj.acceleration_vector_i[:, i + 1]
+        s.hf["true_accel_b"][:, i + 1] = traj.acceleration_vector_b[:, i + 1]
 
         # # update class structs to compute f vectors
         accel.update_states(
@@ -124,5 +132,4 @@ if __name__ == "__main__":
         s.hf["f"][:, :, i + 1] = accel.f
         s.hf["fiber_len"][:, i + 1] = np.linalg.norm(accel.f, axis=1)
 
-        
     f.close()
