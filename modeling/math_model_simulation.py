@@ -11,7 +11,7 @@ import numpy as np
 from tqdm import tqdm
 import h5py
 import pandas as pd
-from modeling.mathModelAccel import (
+from modeling.math_model_accel import (
     AccelModelInertialFrame,
     InverseProblem,
     SimpleSolution,

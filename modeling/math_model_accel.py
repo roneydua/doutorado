@@ -278,9 +278,9 @@ class AccelModelBaseFrame(object):
 
 
 class AccelModelInertialFrame(object):
-    density = 2.6989e3
+    density = 2.6989e6
     """material density  (aluminum)"""
-    E = 70e9  # GPa
+    E = 70e8  # GPa
     """Young's Module"""
     fiber_diameter = 125e-6
     """fiber diameter"""
@@ -604,8 +604,15 @@ class AccelModelInertialFrame(object):
         # self.inertial_base_sensor @ wb + 0.5 * self.k * Qb.T @ sum_f_hat_dell_dfdq_B - u[3:])
         # calculate a angular acceleration of body sensor
         # ATTENTION! due to symmetry, the product fq.screwMatrix(wm) @ self.inertial_seismic_mass @ wm it is always zero!
-        dd_x[23:26] = -self.inertial_seismic_mass_inv @ (
-            0.5 * self.k * Qm.T @ sum_f_hat_dell_dfdq_M
+        dd_x[23:26] = (
+            -0.5
+            * self.k
+            * self.inertial_seismic_mass_inv[0, 0]
+            * Qm.T
+            @ sum_f_hat_dell_dfdq_M
+        )
+        dd_x[23:26] -= (100*self.damper_for_computation_simulations / self.inertial_seismic_mass_inv[0,0]) * (
+            wm-wb
         )
         return dd_x
 
@@ -668,7 +675,7 @@ class InverseProblem(AccelModelInertialFrame):
             for i, j in enumerate(self.fibers_with_info_index):
                 _aux_vector[i, :] = self.m_M[j, :] - self.b_B[j, :]
                 self.aux_var_psi_matrix[i] = _aux_vector[i, :].dot(_aux_vector[i, :])
-                self.var_xi[i, 1:4] = 2.0 * (self.m_M[j, :] -  self.b_B[j, :])
+                self.var_xi[i, 1:4] = 2.0 * _aux_vector[i, :]
                 if self.recover_type_flag == "full":
                     self.var_xi[i, 4:7] = -4.0 * self.m_M[j, :]
                 self.var_xi[i, -3:] = -4.0 * np.cross(self.m_M[j, :], self.b_B[j, :])
@@ -692,7 +699,7 @@ class InverseProblem(AccelModelInertialFrame):
             # in this case the least squared method use only the inverse matrix of var_gamma
             self.least_square_matrix = np.linalg.inv(self.var_xi)
         else:
-            # It is necessary compute pseud inverse of matrix
+            # It is necessary compute pseudo inverse of matrix
             self.least_square_matrix = np.linalg.pinv(self.var_xi)
 
     def compute_inverse_problem_solution(self, fiber_len: np.ndarray):
@@ -726,7 +733,10 @@ class InverseProblem(AccelModelInertialFrame):
         elif self.recover_type_flag in ("full", "reduced"):
             ## compute relative attitude
             self.estimated_q_M_B[1:] = self.var_gamma[-3:]
-            self.estimated_q_M_B[0] = 1.0-np.linalg.norm(self.estimated_q_M_B[1:])
+            self.estimated_q_M_B[0] = np.sqrt(
+                1.0 - self.estimated_q_M_B[1:].dot(self.estimated_q_M_B[1:])
+            )
+
             _rot_M_B = fq.rotationMatrix(self.estimated_q_M_B)
             for i in range(12):
                 self.estimated_f_B[i, :] = (
@@ -746,20 +756,23 @@ class InverseProblem(AccelModelInertialFrame):
     def estiamate_dw_B(self):
         _t = np.zeros(4)
         _Q_Im_k = (
-            self.k
-            / self.inertial_seismic_mass_inv[0, 0]
+            -0.5
+            * self.k
+            * self.inertial_seismic_mass_inv[0, 0]
             * fq.matrixQ(self.estimated_q_M_B).T
         )
+
         for i in range(12):
             _t += (
                 (
                     (self.norm_of_estimated_f_B[i] - self.fiber_length)
                     / self.norm_of_estimated_f_B[i]
                 )
-                * fq.calc_dfdq(v=self.estimated_f_B[i,:],q=self.estimated_q_M_B)
+                * fq.calc_dfdq(v=self.m_M[i, :], q=self.estimated_q_M_B)
                 @ self.estimated_f_B[i, :]
             )
-        return _Q_Im_k@_t
+
+        return _Q_Im_k @ _t
 
 
 class SimpleSolution(AccelModelInertialFrame):

@@ -18,7 +18,7 @@ import numpy as np
 import sympy as sp
 from IPython.core.interactiveshell import InteractiveShell
 from ipywidgets import fixed, interact, interactive
-from modeling.mathModelAccel import AccelModel
+from modeling.math_model_accel import AccelModel
 from matplotlib import ticker
 from IPython.display import display, Markdown
 

@@ -7,7 +7,7 @@
 @Contact :   roneyddasilva@gmail.com
 '''
 
-from modeling.mathModelAccel import AccelModel
+from modeling.math_model_accel import AccelModel
 import locale
 from debugpy import trace_this_thread
 import uncertainties as un
