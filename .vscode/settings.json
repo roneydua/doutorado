@@ -8,5 +8,6 @@
         "ddrm",
         "dfdq",
         "mult"
-    ]
+    ],
+    "jupyter.notebookFileRoot": "${workspaceFolder}/"
 }
