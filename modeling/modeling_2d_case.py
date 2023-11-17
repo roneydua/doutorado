@@ -30,7 +30,7 @@ class Accel2D(object):
         _aux_vector = np.ones((self.fibers_with_info.size, 2))
         self.f = np.ones((self.fibers_with_info.size, 2))
         self.fiber_len = np.zeros(self.fibers_with_info.size)
-        '''auxiliar vector to compute (m-b) with dimenstion fiber_with_sise by 3, used on var_xi and var_psi'''
+        '''auxiliar vector to compute (m-b) with dimension fiber_with_sise by 3, used on var_xi and var_psi'''
         self.aux_var_psi_matrix = np.zeros(self.fibers_with_info.size)
         for i, j in enumerate(self.fibers_with_info_index):
             _aux_vector[i, :] = self.m_M[j, :] - self.b_B[j, :]

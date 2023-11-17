@@ -189,11 +189,11 @@ def calc_dfdq(q, v):
     '''
     calc_dfdq Calculate jacobian of rotated vector
     Args:
-        q: quanternion rotation
+        q: quaternion rotation
         v: vector 3x1
     Returns:
         Jacobian of rotation vector w.r.t quaterion. 
-        NOTE: This function retunr transpose of Jacobian
+        NOTE: This function return transpose of Jacobian
     '''
     dfdq = np.zeros((4, 3))
     dfdq[0, :] = q[0] * v.T - v.T @ screw_matrix(q[1:])
