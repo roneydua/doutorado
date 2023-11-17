@@ -84,10 +84,10 @@ def mult_quat(p:np.ndarray, q:np.ndarray):
         r: result of multiplication. r = p x q
     '''
     r = np.array([0.,0.,0.,0.])
-    r[0] = q[0] * p[0] - q[1] * p[1] - q[2] * p[2] - q[3] * p[3]
-    r[1] = q[1] * p[0] + q[0] * p[1] - q[3] * p[2] + q[2] * p[3]
-    r[2] = q[2] * p[0] + q[3] * p[1] + q[0] * p[2] - q[1] * p[3]
-    r[3] = q[3] * p[0] - q[2] * p[1] + q[1] * p[2] + q[0] * p[3]
+    r[0] = p[0] * q[0] - p[1] * q[1] - p[2] * q[2] - p[3] * q[3]
+    r[1] = p[1] * q[0] + p[0] * q[1] - p[3] * q[2] + p[2] * q[3]
+    r[2] = p[2] * q[0] + p[3] * q[1] + p[0] * q[2] - p[1] * q[3]
+    r[3] = p[3] * q[0] - p[2] * q[1] + p[1] * q[2] + p[0] * q[3]
     return r
 
 def conj(q):
