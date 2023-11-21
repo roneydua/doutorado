@@ -18,7 +18,7 @@ import pandas as pd
 from pymeasure.instruments.anritsu import AnritsuMS9710C
 from pyvisa import ResourceManager
 
-from aquisitions.auxiliary_classes import Dynamometer, EncoderMikeController
+from acquisitions.auxiliary_classes import Dynamometer, EncoderMikeController
 from common_functions.generic_functions import *
 
 mpl.rcParams['figure.dpi'] = 72
@@ -86,7 +86,7 @@ def test_setup():
     osa.write("MPT 5001")
     # osa.write('SSI')
     osa.resolution = experiment_data_save(10).df['resolution_nm'][0]
-    # Enabel true resulution
+    # Enabel true resolution
     osa.write('ARES ON')  # osa.write("SRT")
     # osa.clear()
     osa.write(r'ARED?')

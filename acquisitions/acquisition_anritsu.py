@@ -18,7 +18,7 @@ from pymeasure.instruments.anritsu import AnritsuMS9710C
 from common_functions.generic_functions import *
 from pyvisa import ResourceManager
 
-from aquisitions.auxiliary_classes import Dynamometer, EncoderMikeController
+from acquisitions.auxiliary_classes import Dynamometer, EncoderMikeController
 
 mpl.rcParams['figure.dpi'] = 72
 plt.style.use("common_functions/roney3.mplstyle")
