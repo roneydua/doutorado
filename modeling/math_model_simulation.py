@@ -18,6 +18,7 @@ from modeling.math_model_accel import (
 )
 from modeling.trajectories import Trajectory
 from common_functions.RK import RungeKutta
+from scipy.integrate import solve_ivp
 from common_functions import quaternion_functions as fq
 
 import matplotlib.pyplot as plt
@@ -105,9 +106,25 @@ if __name__ == "__main__":
     # )
     for i in tqdm(range(s.hf["t"].size - 1)):
         # integration of states
-        s.hf["x"][:, i + 1] = RK.integrates_states(
-            s.hf["x"][:, i], u=None, h=s.hf.attrs["dt"]
+        # s.hf["x"][:, i + 1] = RK.integrates_states(
+        #     s.hf["x"][:, i], h=s.hf.attrs["dt"]
+        # )
+        solution = solve_ivp(
+            accel.func_dd_x,
+            t_span=(s.hf["t"][i], s.hf["t"][i + 1]),
+            y0=s.hf["x"][:, i],
+            # method="RK23",
+            # method="DOP853",
+            method="RK45",
+            # rtol=1e-10,
+            # atol=1e-10,
+            # start_step=1e-11,
+            max_step=5e-6,
+            # dense_output=True,
         )
+        
+        s.hf["x"][:, i + 1] = solution.y[:, -1]
+
         # Put the body in specific trajectories
         s.hf["x"][:3, i + 1] = traj.velocity_vector_i[:, i + 1]
         s.hf["x"][6:9, i + 1] = traj.position_vector_i[:, i + 1]
