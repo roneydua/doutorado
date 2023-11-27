@@ -345,7 +345,9 @@ class AccelModelInertialFrame(object):
             f_hat_dell[:, i] *= f_norm - self.fiber_length
             # sum for compute translational movements
             sum_f_hat_dell += f_hat_dell[:, i]
-            sum_f_hat_dell_dfdq_M += fq.calc_dfdq(qm, self.m_M[i, :]) @ f_hat_dell[:, i]
+            sum_f_hat_dell_dfdq_M += (
+                fq.calc_dfdq(qm, self.m_M[i, :]).T @ f_hat_dell[:, i]
+            )
             # NOTE: important signal of dfdq
             # sum_f_hat_dell_dfdq_B = -calc_dfdq(qb, self.b_B[i, :]) @ f_hat_dell[:, i]
         # calculate dd_rm
@@ -532,11 +534,10 @@ class InverseProblem(AccelModelInertialFrame):
 
         for i in range(12):
             _t += (
-                (
-                    (self.norm_of_estimated_f_B[i] - self.fiber_length)
-                    / self.norm_of_estimated_f_B[i]
-                )
-                * fq.calc_dfdq(v=self.m_M[i, :], q=self.estimated_q_M_B)
+                (self.norm_of_estimated_f_B[i] - self.fiber_length)
+                / self.norm_of_estimated_f_B[i]
+            ) * (
+                fq.calc_dfdq(v=self.m_M[i, :], q=self.estimated_q_M_B).T
                 @ self.estimated_f_B[i, :]
             )
 
