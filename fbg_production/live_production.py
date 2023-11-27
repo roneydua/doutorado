@@ -11,7 +11,7 @@ import numpy as np
 import locale
 import matplotlib.pyplot as plt
 from time import sleep
-from aquisitions.Q8347 import Q8347
+from acquisitions.Q8347 import Q8347
 from common_functions.generic_functions import reflectivity_transmition
 from datetime import datetime
 from pathlib import Path
@@ -24,7 +24,7 @@ my_colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 FIG_L = 6.29
 FIG_A = (90.0) / 25.4
 
-osa = Q8347(center=1550,span=20,high_resolution=True)
+osa = Q8347(center=1300,span=600,high_resolution=False)
 osa.read()
 
 
@@ -41,7 +41,7 @@ fig.supxlabel(r'$\lambda, [\si{\nm}]$')
 iteration=1
 while True:
     try:
-        print('Aquisition number '+str(iteration))
+        print('Acquisition number '+str(iteration))
         r = reflectivity_transmition(d0=y_all[:, 0],di=y_all[:,iteration-1])
         ax[0].plot(wavelength_m*1e9, y)
         ax[1].clear()
@@ -55,7 +55,7 @@ while True:
         reflectivity = np.column_stack((reflectivity, r))
         iteration +=1
     except KeyboardInterrupt:
-        print('Stop of aquisiton')
+        print('Stop of acquisition')
         osa.close()
         break
 

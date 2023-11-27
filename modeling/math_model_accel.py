@@ -31,7 +31,7 @@ class states:
             q: Attitude quaterion.
         """
         self.q = q
-        self.euler = fq.quat2Euler(q, deg=1)
+        # self.euler = fq.quat2Euler(q, deg=1)
         self.rot = fq.rotationMatrix(self.q)
 
     def psi(self):
@@ -93,25 +93,28 @@ class AccelModelInertialFrame(object):
         self.seismic_mass = (self.seismic_edge**3.0) * self.density
         """Sismic mass"""
         self.external_base_sensor_edge = (
-            self.seismic_edge + 2 * self.fiber_length + 4e-3
+            self.seismic_edge + 2.0 * self.fiber_length + 4e-3
         )
         """ approximation of the base of the sensor as a cube.The value 6e-3 refers double the length of the fibers that support the cube.4e-3 is twice the thickness."""
-        self.base_sensor_edge = self.seismic_edge + 2 * self.fiber_length
+        self.base_sensor_edge = self.seismic_edge + 2.0 * self.fiber_length
         self.base_sensor_mass = (
-            self.external_base_sensor_edge**3 - self.base_sensor_edge**3
-        ) * self.density
+            1e3
+            * (self.external_base_sensor_edge**3 - self.base_sensor_edge**3)
+            * self.density
+        )
         self.inertial_seismic_mass = (
             np.eye(3) * self.seismic_mass / 6.0 * self.seismic_edge**2
         )
-        self.inertial_base_sensor = (
+        """ Matrix of moments of inertia da massa seismic"""
+        self.inertial_base_sensor = 1e3 * (
             np.eye(3) * self.base_sensor_mass / 6.0 * self.seismic_edge**2
         )
         # NOTE: Only for computational economy
         self.inertial_base_sensor_inv = inv(self.inertial_base_sensor)
         self.inertial_seismic_mass_inv = inv(self.inertial_seismic_mass)
         # perpendicular distance of center
-        _d = self.seismic_edge / 2 - 1e-3
-        _e = self.seismic_edge / 2
+        _d = self.seismic_edge / 2.0 - 1e-3
+        _e = self.seismic_edge / 2.0
         self.m_M = np.array(
             [
                 [_e, _d, 0.0],  # X+ GRADE
@@ -129,7 +132,7 @@ class AccelModelInertialFrame(object):
             ]
         )
         """Connections in the seismic mass """
-        _f = self.base_sensor_edge / 2
+        _f = self.base_sensor_edge / 2.0
         self.b_B = np.array(
             [
                 [_f, _d, 0.0],  # X
@@ -299,14 +302,14 @@ class AccelModelInertialFrame(object):
         """
         return d_x[23:26]
 
-    def dd_x_forced_body_state(self, d_x: np.ndarray, u: np.ndarray or None):
+    def func_dd_x(self, t: float, d_x: np.ndarray):
         """
         dd_x_forced_body_state calc second order of model for numerical integration.
         Args:
             d_x: first order [drb,drm,rb,rm,qb,qm,wb,wm]
         """
         # d_x = np.arange(1, 21)
-        dd_x = 1.0 * d_x
+        dd_x = np.zeros(26)
 
         d_rb = d_x[:3]
         """inertial velocity of body sensor"""
@@ -322,68 +325,87 @@ class AccelModelInertialFrame(object):
         """Atitude quaternion of seismic mass"""
         wb = d_x[20:23]
         """Angular velocity of body sensor"""
-        wm = d_x[23:26]
+        wm = d_x[23:]
         """Angular velocity of seismic mass"""
         # calculate deformation vector
         f_hat_dell = np.zeros((3, 12))
         sum_f_hat_dell = np.zeros(3)
         sum_f_hat_dell_dfdq_M = np.zeros(4)
-        # sum_f_hat_dell_dfdq_B = np.zeros(4)
+        sum_f_hat_dell_dfdq_B = np.zeros(4)
+        rot_qm = fq.rotationMatrix(qm)
+        rot_qb = fq.rotationMatrix(qb)
         for i in range(12):
             # compute f
             f_hat_dell[:, i] = (
                 rm
-                + fq.rotationMatrix(qm) @ self.m_M[i, :]
+                + rot_qm @ self.m_M[i, :]
                 - rb
-                - fq.rotationMatrix(qb) @ self.b_B[i, :]
+                - rot_qb @ self.b_B[i, :]
             )
             # calculate a norm of v to get deformation and versor of f
             f_norm = np.linalg.norm(f_hat_dell[:, i])
             # compute f_hat
             f_hat_dell[:, i] /= f_norm
             # compute f_hat_dell
-            f_hat_dell[:, i] *= f_norm - self.fiber_length
+            f_hat_dell[:, i] *= (f_norm - self.fiber_length)
             # sum for compute translational movements
             sum_f_hat_dell += f_hat_dell[:, i]
             sum_f_hat_dell_dfdq_M += (
                 fq.calc_dfdq(qm, self.m_M[i, :]).T @ f_hat_dell[:, i]
             )
             # NOTE: important signal of dfdq
-            # sum_f_hat_dell_dfdq_B = -calc_dfdq(qb, self.b_B[i, :]) @ f_hat_dell[:, i]
+            sum_f_hat_dell_dfdq_B -= (
+                fq.calc_dfdq(qb, self.b_B[i, :]).T @ f_hat_dell[:, i]
+            )
+        dd_x[:3] = self.k * sum_f_hat_dell / self.base_sensor_mass
+        # dd_x[:3] += (self.damper_for_computation_simulations / self.base_sensor_mass) * (
+            # d_rm - d_rb
+        # )
         # calculate dd_rm
         dd_x[3:6] = -self.k * sum_f_hat_dell / self.seismic_mass
-        dd_x[5] += self.G
+        # dd_x[5] += self.G
         # artificial damper
-        dd_x[3:6] -= (self.damper_for_computation_simulations / self.seismic_mass) * (
-            d_rm - d_rb
-        )
-
+        # dd_x[3:6] -= (self.damper_for_computation_simulations / self.seismic_mass) * (
+            # d_rm - d_rb
+        # )
         # calculate d_rb
         dd_x[6:9] = d_rb
         # calculate d_rm
         dd_x[9:12] = d_rm
         # Left quaternion matrix
-        # Qb = fq.matrixQ(qb)
+        Qb = fq.matrixQ(qb)
         Qm = fq.matrixQ(qm)
         # calculate attitude quaternion of body sensor
-        # dd_x[12:16] = 0.5 * Qb @ wb
+        dd_x[12:16] = 0.5000000001 * Qb @ wb
         # calculate attitude quaternion of seismic mass
-        dd_x[16:20] = 0.5 * Qm @ wm
+        dd_x[16:20] = 0.5000000001 * Qm @ wm
         # calculate a angular acceleration of body sensor
         # dd_x[20:23] = -self.inertial_base_sensor_inv @ (fq.screwMatrix(wb) @
         # self.inertial_base_sensor @ wb + 0.5 * self.k * Qb.T @ sum_f_hat_dell_dfdq_B - u[3:])
+        dd_x[20:23] = -(
+            0.5
+            * self.inertial_base_sensor_inv[0, 0]
+            * self.k
+            * Qb.T
+            @ sum_f_hat_dell_dfdq_B
+        )
+        dd_x[20:23] += (
+            self.damper_for_computation_simulations
+            * self.inertial_base_sensor_inv[0, 0]
+        ) * (rot_qb.T@rot_qm@wm - wb)
         # calculate a angular acceleration of body sensor
         # ATTENTION! due to symmetry, the product fq.screwMatrix(wm) @ self.inertial_seismic_mass @ wm it is always zero!
-        dd_x[23:26] = (
-            -0.5
+
+        dd_x[23:26] = -(
+            0.5
             * self.k
             * self.inertial_seismic_mass_inv[0, 0]
-            * Qm.T
-            @ sum_f_hat_dell_dfdq_M
+            * (Qm.T @ sum_f_hat_dell_dfdq_M)
         )
-        dd_x[23:26] -= (1e1*self.damper_for_computation_simulations / self.inertial_seismic_mass_inv[0,0]) * (
-            wm-wb
-        )
+        dd_x[23:26] -= (
+            self.damper_for_computation_simulations
+            * self.inertial_seismic_mass_inv[0, 0]
+        ) * (wm - rot_qm.T@rot_qb@wb)
         return dd_x
 
 
@@ -394,7 +416,7 @@ class InverseProblem(AccelModelInertialFrame):
     """Type of recover. full_estimation for complete solution and full_estimation_reduced to recover angular acceleration. linear_estimation do not recover angular accelerations"""
     estimated_rm_B = np.zeros(3)
     # estimated relative position of body and seismic mass
-    estimated_q_M_B = np.zeros(4)
+    estimated_q_M_B = np.array([1.0, 0.0, 0.0, 0.0])
     # estimated atitude quaternion seismic mass with respect to body
     estimated_f_B = np.zeros((12, 3))
     # estimate f vector on B coordinate system
@@ -447,9 +469,11 @@ class InverseProblem(AccelModelInertialFrame):
                 self.aux_var_psi_matrix[i] = _aux_vector[i, :].dot(_aux_vector[i, :])
                 self.var_xi[i, 1:4] = 2.0 * _aux_vector[i, :]
                 if self.recover_type_flag == "full":
-                    self.var_xi[i, 4:7] = -4.0 * self.m_M[j, :]
-                self.var_xi[i, -3:] = -4.0 * np.cross(self.m_M[j, :], self.b_B[j, :])
-
+                    self.var_xi[i, 4:7] = -4.0 * self.m_M[j, :].T
+                # self.var_xi[i, -3:] = -4.0 * np.cross(self.m_M[j, :], self.b_B[j, :])
+                self.var_xi[i, -3:] = (
+                    -4.0 * self.m_M[j, :].T @ fq.screw_matrix(self.b_B[j, :])
+                )
         else:
             self.recover_type_flag = "linear_estimation"
             self.var_xi = np.ones((self.fibers_with_info.size, 4))
@@ -459,6 +483,7 @@ class InverseProblem(AccelModelInertialFrame):
             _aux_vector = np.ones((self.fibers_with_info.size, 3))
             """auxiliar vector to compute (m-b) with dimension fiber_with_sise by 3, used on var_xi and var_psi"""
             self.aux_var_psi_matrix = np.zeros(self.fibers_with_info.size)
+
             for i, j in enumerate(self.fibers_with_info_index):
                 _aux_vector[i, :] = self.m_M[j, :] - self.b_B[j, :]
                 self.aux_var_psi_matrix[i] = _aux_vector[i, :].dot(_aux_vector[i, :])
@@ -476,7 +501,7 @@ class InverseProblem(AccelModelInertialFrame):
         """
         compute_inverse_problem_solution
         Args:
-            fiber_len: vector of fiber_len is ((f).dot(f))^2
+            fiber_len: vector of fiber_len is ((f).dot(f))^1/2
         """
         self.var_psi = np.square(fiber_len) - self.aux_var_psi_matrix
         self.var_gamma = self.least_square_matrix @ self.var_psi

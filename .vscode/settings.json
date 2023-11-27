@@ -5,9 +5,11 @@
         "python"
     ],
     "cSpell.words": [
+        "ARED",
         "ddrm",
         "dfdq",
         "mult"
     ],
-    "jupyter.notebookFileRoot": "${workspaceFolder}/"
+    "jupyter.notebookFileRoot": "${workspaceFolder}/",
+    "jupyter.interactiveWindow.codeLens.enable": true 
 }

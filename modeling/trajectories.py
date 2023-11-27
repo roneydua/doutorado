@@ -43,55 +43,51 @@ class Trajectory(object):
         """ body velocity """
         self.angular_acceleration_vector_b = np.zeros((3, self.n))
         """ body acceleration """
-        # find time indexes
-        self.ft = 100.0 * 2.0 * np.pi
-        self.ft_y = 50 * 2.0 * np.pi
-
-        self.at = 150.0 / self.ft**2.0
-        self.at_y = 150.0 / self.ft_y**2
-        self.at_z = 10.0
-
-        self.tc = 300.0
-
-        self.ft_w_x = 10.0 * 2.0 * np.pi
-        self.ft_w_y = -10.0 * 2.0 * np.pi
-        self.ft_w_z = 20.0 * 2.0 * np.pi
+        
         if kwargs["test"] == "translational_movement":
             print("Linear pure trajectory")
-            self.aw_x = self.aw_y = self.aw_z = 0.0
-        else:
-            print("Linear and angular trajectory")
-            self.aw_x = 10.0
-            self.aw_y = 20.0
-            self.aw_z = 30.0
+            self.acceleration_vector_i[
+                0, :
+            ] = 20.0 * self.make_delayed_exponential_step(self.time_vector, 2e-3, 1e-2)
+            self.acceleration_vector_i[
+                1, :
+            ] = 20.0 * self.make_delayed_exponential_step(self.time_vector, 20e-3, 1e-2)
+            self.acceleration_vector_i[
+                2, :
+            ] = 20.0 * self.make_delayed_exponential_step(self.time_vector, 30e-3, 1e-2)
 
-        try:
-            self.idx_y = np.where(self.time_vector > 2.0 * (2.0 * np.pi) / self.ft)[0][
-                0
-            ]
-        except IndexError:
-            self.idx_y = self.n
-        try:
-            self.idx_xy = np.where(self.time_vector > 3.0 * (2.0 * np.pi) / self.ft_y)[
-                0
-            ][0]
-        except IndexError:
-            self.idx_xy = self.n
-        try:
-            self.idx_xyz = np.where(self.time_vector > 5.0 * (2.0 * np.pi) / self.ft_y)[
-                0
-            ][0]
-        except IndexError:
-            self.idx_xyz = self.n
-        for idx, t in enumerate(self.time_vector):
-            self.acceleration_vector_i[:, idx] = self.acceleration_value(t)
-            self.angular_velocity_vector_b[:, idx] = self.angular_velocity_value(t)
-            self.angular_acceleration_vector_b[:, idx] = self.angular_acceleration_value(t)
-        # set null values on first block of y and z
-        self.acceleration_vector_i[1, : self.idx_y] *= 0.0
-        # set null values on second block of
-        self.acceleration_vector_i[0, self.idx_y : self.idx_xy] *= 0.0
-        # integration with trap
+        elif kwargs["test"] == "angular_movement":
+            print("Angular trajectory")
+
+            self.angular_acceleration_vector_b[
+                0, :
+            ] = 2.0 * self.make_delayed_exponential_step(self.time_vector, 10e-3, 1e-1)
+            self.angular_acceleration_vector_b[
+                1, :
+            ] = 2.0 * self.make_delayed_exponential_step(self.time_vector, 20e-3, 1e-1)
+            self.angular_acceleration_vector_b[
+                2, :
+            ] = 2.0 * self.make_delayed_exponential_step(self.time_vector, 30e-3, 1e-1)
+        elif kwargs["test"] == "complete_movement":
+            print("Complete trajectory")
+            # a gravity value on z direction
+            self.angular_velocity_vector_b[0, 0] = 20.0 
+            self.angular_velocity_vector_b[1, 0] = 20.0 
+            self.angular_velocity_vector_b[1, 0] = 40.0 
+            self.acceleration_vector_i[
+                2, :
+            ] = 10.0 * self.make_delayed_exponential_step(self.time_vector, 0, 1e-2)
+
+            self.angular_acceleration_vector_b[
+                0, :
+            ] = 1.0 * self.make_delayed_exponential_step(self.time_vector, 2e-3, 1e-1)
+            self.angular_acceleration_vector_b[
+                1, :
+            ] = 2.0 * self.make_delayed_exponential_step(self.time_vector, 4e-3, 1e-1)
+            self.angular_acceleration_vector_b[
+                2, :
+            ] = 1 * self.make_delayed_exponential_step(self.time_vector, 1, 1e-1)
+
         dt = self.time_vector[1] - self.time_vector[0]
         for idx in range(self.n - 1):
             self.velocity_vector_i[:, idx + 1] = self.velocity_vector_i[:, idx] + (
@@ -101,54 +97,31 @@ class Trajectory(object):
             self.position_vector_i[:, idx + 1] = self.position_vector_i[:, idx] + (
                 self.velocity_vector_i[:, idx] + self.velocity_vector_i[:, idx + 1]
             ) * 0.5 * (self.time_vector[idx + 1] - self.time_vector[idx])
+            self.angular_velocity_vector_b[:, idx + 1] = (
+                self.angular_velocity_vector_b[:, idx]
+                + (
+                    self.angular_acceleration_vector_b[:, idx]
+                    + self.angular_acceleration_vector_b[:, idx + 1]
+                )
+                * 0.5
+                * dt
+            )
             self.q_b_i[:, idx + 1] = fq.mult_quat(
                 p=self.q_b_i[:, idx],
-                q=fq.expMap(self.angular_velocity_vector_b[:, idx], dt=dt),
+                q=fq.expMap(self.angular_velocity_vector_b[:, idx+1], dt=dt),
             )
             self.acceleration_vector_b[:, idx + 1] = (
-                fq.rotationMatrix(self.q_b_i[:, idx + 1])
+                fq.rotationMatrix(self.q_b_i[:, idx + 1]).T
                 @ self.acceleration_vector_i[:, idx]
             )
 
-    def acceleration_value(self, time: float):
-        y = np.array([0.0, 0.0, 0.0])
-        y[0] = -self.at * (self.ft**2) * np.sin(self.ft * time)
-        y[1] = -self.at_y * (self.ft_y**2) * np.sin(self.ft_y * time)
-        y[2] = self.at_z * (1 - np.exp(-self.tc * time))
-        return y
-
-    def velocity_value(self, time: float):
-        y = np.array([0.0, 0.0, 0.0])
-        y[0] = self.at * self.ft * np.cos(self.ft * time)
-        y[1] = self.at_y * self.ft_y * np.cos(self.ft_y * time)
-        y[2] = self.at_z * (time + np.exp(-self.tc * time) / self.tc)
-        return y
-
-    def position_value(self, time: float):
-        y = np.array([0.0, 0.0, 0.0])
-        y[0] = self.at * np.sin(self.ft * time)
-        y[1] = self.at_y * np.sin(self.ft_y * time)
-        y[2] = self.at_z * (0.5 * time**2 - np.exp(-self.tc * time) / (self.tc**2))
-        return y
-
-    def angular_acceleration_value(self, time: float):
-        y = np.array([0.0, 0.0, 0.0])
-        # y[0] = aw_x*(np.exp(-time)-1) * np.sin(ft*time)
-        # y[1] = aw_y*(np.exp(-time)-1) * np.cos(ft_y * time)
-        # y[2] = aw_z*(np.exp(-time)-1)
-        y[0] = self.ft_w_x * self.aw_x * np.cos(self.ft_w_x * time)
-        y[1] = self.ft_w_y * self.aw_y * np.cos(self.ft_w_y * time)
-        y[2] = self.ft_w_z * self.aw_z * np.cos(self.ft_w_z * time)
-        return y
-
-    def angular_velocity_value(self, time: float):
-        y = np.array([0.0, 0.0, 0.0])
-        # y[0] = aw_x*(np.exp(-time)-1) * np.sin(ft*time)
-        # y[1] = aw_y*(np.exp(-time)-1) * np.cos(ft_y * time)
-        # y[2] = aw_z*(np.exp(-time)-1)
-        y[0] = self.aw_x * np.sin(self.ft_w_x * time)
-        y[1] = self.aw_y * np.sin(self.ft_w_y * time)
-        y[2] = self.aw_z * np.sin(self.ft_w_z * time)
+    def make_delayed_exponential_step(
+        self, time_vector: np.ndarray or float, time_delay=0.0, tau=1.0
+    ):
+        y = 1 - np.exp(-(time_vector - time_delay) / tau)
+        for i, _y in enumerate(y):
+            if _y < 0.0:
+                y[i] = 0.0
         return y
 
     def plot_trajectories(self):
@@ -230,11 +203,11 @@ class Trajectory(object):
     def plot_angular_acceleration(self):
         fig, ax = plt.subplots(3, 1, num=5, sharex=True, figsize=(FIG_L, FIG_A))
 
-        fig.supylabel(r"$\dot{\mathbf{\omega} [\unit{\radian\per\squared\second}]$")
+        # fig.supylabel(r" $\dot{\mathbf{\omega}$ $[\unit{\radian\per\squared\second}]$")
         fig.supxlabel(r"Tempo, [$\unit{\ms}$]")
-        ax[0].plot(1e3 * self.time_vector, self.angular_angular_vector_b[0, :])
-        ax[1].plot(1e3 * self.time_vector, self.angular_angular_vector_b[1, :])
-        ax[2].plot(1e3 * self.time_vector, self.angular_angular_vector_b[2, :])
+        ax[0].plot(1e3 * self.time_vector, self.angular_acceleration_vector_b[0, :])
+        ax[1].plot(1e3 * self.time_vector, self.angular_acceleration_vector_b[1, :])
+        ax[2].plot(1e3 * self.time_vector, self.angular_acceleration_vector_b[2, :])
 
     def plot_quaternion(self):
         fig, ax = plt.subplots(4, 1, num=6, sharex=True, figsize=(FIG_L, FIG_A))

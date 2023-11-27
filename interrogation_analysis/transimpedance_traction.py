@@ -14,7 +14,7 @@ import locale
 import pandas as pd
 import matplotlib.pyplot as plt
 import lvm_read
-from modeling.mathModelAccel import AccelModel
+from modeling.math_model_accel import AccelModel
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 # plt.style.use("default")
 plt.style.use("common_functions/roney3.mplstyle")
