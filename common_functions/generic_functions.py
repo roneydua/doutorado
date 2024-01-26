@@ -123,7 +123,3 @@ def calc_bias(self, min_w:float, max_w:float, wavelength:np.ndarray,source:np.nd
     bias_source = np.cumsum(source[index_min:index_max] + power[index_min:index_max])*0.5
     return bias_source
 
-
-
-def gabriel(x:float,y:float):
-    return x*y
