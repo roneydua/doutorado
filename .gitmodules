@@ -1,0 +1,3 @@
+[submodule "firmware-acc"]
+	path = firmware-acc
+	url = https://github.com/IEAv-EFO/firmware-acc
