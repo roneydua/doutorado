@@ -122,11 +122,11 @@ def put_data_production_on_hdf_20230817():
         ff = f.require_group("fbg_production/20230817/fbg"+str(i))
         ff["wavelength_m"] = data_pd.iloc[:, 0]
         ff["optical_power_dbm"] = data_pd.iloc[:, 1:]
-        refletictivity = np.zeros(ff["optical_power_dbm"].shape)
+        reflectivity = np.zeros(ff["optical_power_dbm"].shape)
         for j in range(ff["optical_power_dbm"].shape[1]):
-            refletictivity[:, j] = reflectivity_transmition(
+            reflectivity[:, j] = reflectivity_transmition(
                 ff["optical_power_dbm"][:, 0], ff["optical_power_dbm"][:, j])
-        ff["reflectivity"] = refletictivity
+        ff["reflectivity"] = reflectivity
         # with open(folder+"/metadata.txt") as metadata:
         #     ff.attrs['metadata']=metadata.readlines()
         f.close()
@@ -144,11 +144,11 @@ def put_data_production_on_hdf_20230822():
         ff = f.require_group("fbg_production/20230822/fbg"+str(i))
         ff["wavelength_m"] = data_pd.iloc[:, 0]
         ff["optical_power_dbm"] = data_pd.iloc[:, 1:]
-        refletictivity = np.zeros(ff["optical_power_dbm"].shape)
+        reflectivity = np.zeros(ff["optical_power_dbm"].shape)
         for j in range(ff["optical_power_dbm"].shape[1]):
-            refletictivity[:, j] = reflectivity_transmition(
+            reflectivity[:, j] = reflectivity_transmition(
                 ff["optical_power_dbm"][:, 0], ff["optical_power_dbm"][:, j])
-        ff["reflectivity"] = refletictivity
+        ff["reflectivity"] = reflectivity
         with open(FOLDER+"metadata"+"_FBG#"+str(i)+".txt", errors='ignore') as metadata:
             ff.attrs['metadata'] = metadata.readlines()
         f.close()
@@ -166,11 +166,11 @@ def put_data_production_on_hdf_20230904():
         ff = f.require_group("fbg_production/20230904/fbg"+i)
         ff["wavelength_m"] = data_pd.iloc[:, 0]
         ff["optical_power_dbm"] = data_pd.iloc[:, 1:]
-        refletictivity = np.zeros(ff["optical_power_dbm"].shape)
+        reflectivity = np.zeros(ff["optical_power_dbm"].shape)
         for j in range(ff["optical_power_dbm"].shape[1]):
-            refletictivity[:, j] = reflectivity_transmition(
+            reflectivity[:, j] = reflectivity_transmition(
                 ff["optical_power_dbm"][:, 0], ff["optical_power_dbm"][:, j])
-        ff["reflectivity"] = refletictivity
+        ff["reflectivity"] = reflectivity
         with open(FOLDER+"metadata"+"_FBG#"+i+".txt", errors='ignore') as metadata:
             ff.attrs['metadata'] = metadata.readlines()
         f.close()
@@ -188,11 +188,11 @@ def put_data_production_on_hdf_20230911():
         ff = f.require_group("fbg_production/20230911/fbg"+str(i))
         ff["wavelength_m"] = data_pd.iloc[:, 0]
         ff["optical_power_dbm"] = data_pd.iloc[:, 1:]
-        refletictivity = np.zeros(ff["optical_power_dbm"].shape)
+        reflectivity = np.zeros(ff["optical_power_dbm"].shape)
         for j in range(ff["optical_power_dbm"].shape[1]):
-            refletictivity[:, j] = reflectivity_transmition(
+            reflectivity[:, j] = reflectivity_transmition(
                 ff["optical_power_dbm"][:, 0], ff["optical_power_dbm"][:, j])
-        ff["reflectivity"] = refletictivity
+        ff["reflectivity"] = reflectivity
         with open(FOLDER+"metadata"+"_FBG#"+str(i)+".txt", errors='ignore') as metadata:
             ff.attrs['metadata'] = metadata.readlines()
         f.close()
@@ -210,11 +210,11 @@ def put_data_production_on_hdf_20230912():
         ff = f.require_group("fbg_production/20230912/fbg"+str(i))
         ff["wavelength_m"] = data_pd.iloc[:, 0]
         ff["optical_power_dbm"] = data_pd.iloc[:, 1:]
-        refletictivity = np.zeros(ff["optical_power_dbm"].shape)
+        reflectivity = np.zeros(ff["optical_power_dbm"].shape)
         for j in range(ff["optical_power_dbm"].shape[1]):
-            refletictivity[:, j] = reflectivity_transmition(
+            reflectivity[:, j] = reflectivity_transmition(
                 ff["optical_power_dbm"][:, 0], ff["optical_power_dbm"][:, j])
-        ff["reflectivity"] = refletictivity
+        ff["reflectivity"] = reflectivity
         with open(FOLDER+"metadata"+"_FBG#"+str(i)+".txt", errors='ignore') as metadata:
             ff.attrs['metadata'] = metadata.readlines()
         f.close()
@@ -232,11 +232,11 @@ def put_data_production_on_hdf_20230913():
         ff = f.require_group("fbg_production/20230913/fbg"+str(i))
         ff["wavelength_m"] = data_pd.iloc[:, 0]
         ff["optical_power_dbm"] = data_pd.iloc[:, 1:]
-        refletictivity = np.zeros(ff["optical_power_dbm"].shape)
+        reflectivity = np.zeros(ff["optical_power_dbm"].shape)
         for j in range(ff["optical_power_dbm"].shape[1]):
-            refletictivity[:, j] = reflectivity_transmition(
+            reflectivity[:, j] = reflectivity_transmition(
                 ff["optical_power_dbm"][:, 0], ff["optical_power_dbm"][:, j])
-        ff["reflectivity"] = refletictivity
+        ff["reflectivity"] = reflectivity
         with open(FOLDER+"metadata"+"_FBG#"+str(i)+".txt", errors='ignore') as metadata:
             ff.attrs['metadata'] = metadata.readlines()
         f.close()
@@ -254,11 +254,11 @@ def put_data_production_on_hdf_20230921():
         ff = f.require_group("fbg_production/20230921/fbg"+str(i))
         ff["wavelength_m"] = data_pd.iloc[:, 0]
         ff["optical_power_dbm"] = data_pd.iloc[:, 1:]
-        refletictivity = np.zeros(ff["optical_power_dbm"].shape)
+        reflectivity = np.zeros(ff["optical_power_dbm"].shape)
         for j in range(ff["optical_power_dbm"].shape[1]):
-            refletictivity[:, j] = reflectivity_transmition(
+            reflectivity[:, j] = reflectivity_transmition(
                 ff["optical_power_dbm"][:, 0], ff["optical_power_dbm"][:, j])
-        ff["reflectivity"] = refletictivity
+        ff["reflectivity"] = reflectivity
         with open(FOLDER+"metadata"+"_FBG#"+str(i)+".txt", errors='ignore') as metadata:
             ff.attrs['metadata'] = metadata.readlines()
         f.close()
@@ -279,11 +279,11 @@ def put_data_production_on_hdf(date):
         ff = f.require_group("fbg_production/"+date+"/fbg"+i)
         ff["wavelength_m"] = data_pd.iloc[:, 0]
         ff["optical_power_dbm"] = data_pd.iloc[:, 1:]
-        refletictivity = np.zeros(ff["optical_power_dbm"].shape)
+        reflectivity = np.zeros(ff["optical_power_dbm"].shape)
         for j in range(ff["optical_power_dbm"].shape[1]):
-            refletictivity[:, j] = reflectivity_transmition(
+            reflectivity[:, j] = reflectivity_transmition(
                 ff["optical_power_dbm"][:, 0], ff["optical_power_dbm"][:, j])
-        ff["reflectivity"] = refletictivity
+        ff["reflectivity"] = reflectivity
         with open(FOLDER+"metadata"+"_FBG#"+i+".txt", errors='ignore') as metadata:
             ff.attrs['metadata'] = metadata.readlines()
     f.close()
