@@ -71,7 +71,7 @@ def plot_error_comparision():
         mW_dbm(reflectivity_span))
     ax.plot(reflectivity_span, _y, ls=':', label="Exato")
     ax.legend(ncols=3)
-    plt.savefig("../dissertacao/images/method_error_1.pdf", format="pdf")
+    plt.savefig("../tese/images/method_error_1.pdf", format="pdf")
     plt.close(fig=1)
     fig,ax = make_fig()
     for i in error_dbm:
@@ -83,7 +83,7 @@ def plot_error_comparision():
         mW_dbm(R0_REF))
     ax.plot(reflectivity_span, _y, ls=':', label="Exato")
     ax.legend(ncols=3)
-    plt.savefig("../dissertacao/images/method_error_2.pdf", format="pdf")
+    plt.savefig("../tese/images/method_error_2.pdf", format="pdf")
     plt.close(fig=1)
     fig, ax = make_fig()
     for i in error_dbm:
@@ -97,9 +97,8 @@ def plot_error_comparision():
             reflectivity_span) -
         mW_dbm(1.0))
     ax.legend(ncols=3)
-    
+
     ax.plot(reflectivity_span, _y, ls=':', label="Exato")
-    plt.savefig("../dissertacao/images/method_error_3.pdf", format="pdf")
+    plt.savefig("../tese/images/method_error_3.pdf", format="pdf")
     plt.close(fig=1)
-    
-    Method Error 1
+

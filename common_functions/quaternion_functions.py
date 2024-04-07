@@ -187,7 +187,7 @@ def expMap(w: np.ndarray, dt: float, tolerance=1e-15):
     return expMapArray
 
 
-def calc_dfdq(q, v):
+def calc_dfdq(q, a):
     """
     calc_dfdq Calculate jacobian of rotated vector
     Args:
@@ -205,9 +205,9 @@ def calc_dfdq(q, v):
     # dfdq[1:, :] += q[0] * screw_matrix(v)
     # return 2.0 * dfdq
     dfdq = np.zeros((3, 4))
-    dfdq[:, 0] = q[0] * v + screw_matrix(v) @ q[1:]
-    dfdq[:, 1:] = q[1:] .T @ v * np.eye(3)
-    dfdq[:, 1:] += q[1:].reshape((3, 1)) @ v.reshape((1, 3))
-    dfdq[:, 1:] -= v.reshape((3, 1)) @ q[1:].reshape((1, 3))
-    dfdq[:, 1:] -= q[0] * screw_matrix(v)
+    dfdq[:, 0] = q[0] * a + screw_matrix(q[1:]) @ a
+    dfdq[:, 1:] = q[1:] .T @ a * np.eye(3)
+    dfdq[:, 1:] += q[1:].reshape((3, 1)) @ a.reshape((1, 3))
+    dfdq[:, 1:] -= a.reshape((3, 1)) @ q[1:].reshape((1, 3))
+    dfdq[:, 1:] -= q[0] * screw_matrix(a)
     return 2.0 * dfdq

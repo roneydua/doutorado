@@ -7,9 +7,9 @@
 @Author  :   Roney D. Silva
 @Contact :   roneyddasilva@gmail.com
 '''
-%reload_ext autoreload
-%autoreload 2
-%matplotlib inline
+# %reload_ext autoreload
+# %autoreload 2
+# %matplotlib inline
 
 import locale
 

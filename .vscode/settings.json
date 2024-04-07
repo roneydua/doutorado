@@ -1,6 +1,5 @@
 {
     "python.analysis.extraPaths": ["${workspaceFolder}/"],
-    "pylint.importStrategy": "fromEnvironment",
     "cSpell.enableFiletypes": [
         "python"
     ],
@@ -8,8 +7,13 @@
         "ARED",
         "ddrm",
         "dfdq",
+        "gpib",
         "mult"
     ],
+    "path-intellisense.absolutePathTo": "./",
     "jupyter.notebookFileRoot": "${workspaceFolder}/",
-    "jupyter.interactiveWindow.codeLens.enable": true 
+    "jupyter.interactiveWindow.codeLens.enable": true,
+    "cSpell.ignoreWords": [
+        "lawofs"
+    ]
 }

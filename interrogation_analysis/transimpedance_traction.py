@@ -37,7 +37,7 @@ def traction_and_tension():
     ax[1].set_ylabel(r'Tensão$[\si{\volt}]$')
 
     fig.supxlabel('Tempo$[\\si{\\second}]$')
-    plt.savefig("../dissertacao/images/traction_and_tension.pdf", format="pdf")
+    plt.savefig("../tese/images/traction_and_tension.pdf", format="pdf")
     plt.close(fig=1)
     # ax.plot(4.0*(-f['dyn']-0.5)/(seismic_mass*9.8), f['fbg'], ':')
     # ax.set_ylabel(r'$v^\text{tr}[\si{\volt}]$')
