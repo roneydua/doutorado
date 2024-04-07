@@ -8,7 +8,9 @@
         "ddrm",
         "dfdq",
         "gpib",
-        "mult"
+        "iloc",
+        "mult",
+        "popen"
     ],
     "path-intellisense.absolutePathTo": "./",
     "jupyter.notebookFileRoot": "${workspaceFolder}/",
