@@ -30,7 +30,7 @@ class Trajectory(object):
         self.position_vector_i = np.zeros((3, self.n))
         """ inertial position """
         self.q_b_i = np.zeros((4, self.n))
-        self.q_b_i[0, :] = 1.0
+        self.q_b_i[:, 0] = fq.eulerQuaternion(yaw=0, pitch=95, roll=0)
         """ quaternion transform inertial to body """
         # body states
         self.acceleration_vector_b = np.zeros((3, self.n))
@@ -43,18 +43,16 @@ class Trajectory(object):
         """ body velocity """
         self.angular_acceleration_vector_b = np.zeros((3, self.n))
         """ body acceleration """
-        
+
         if kwargs["test"] == "translational_movement":
             print("Linear pure trajectory")
-            self.acceleration_vector_i[
-                0, :
-            ] = 20.0 * self.make_delayed_exponential_step(self.time_vector, 2e-3, 1e-2)
-            self.acceleration_vector_i[
-                1, :
-            ] = 20.0 * self.make_delayed_exponential_step(self.time_vector, 20e-3, 1e-2)
+            # a gravity value on z direction
+            self.angular_velocity_vector_b[0, 0] = 100.0
+            self.angular_velocity_vector_b[1, 0] = 200.0
+            self.angular_velocity_vector_b[2, 0] = 200.0
             self.acceleration_vector_i[
                 2, :
-            ] = 20.0 * self.make_delayed_exponential_step(self.time_vector, 30e-3, 1e-2)
+            ] = 10.0 * self.make_delayed_exponential_step(self.time_vector, 0, 1e-3)
 
         elif kwargs["test"] == "angular_movement":
             print("Angular trajectory")
@@ -71,32 +69,40 @@ class Trajectory(object):
         elif kwargs["test"] == "complete_movement":
             print("Complete trajectory")
             # a gravity value on z direction
-            self.angular_velocity_vector_b[0, 0] = 20.0 
-            self.angular_velocity_vector_b[1, 0] = 20.0 
-            self.angular_velocity_vector_b[1, 0] = 40.0 
+            self.angular_velocity_vector_b[0, 0] = 50.0
+            self.angular_velocity_vector_b[1, 0] = 50.0
+            self.angular_velocity_vector_b[2, 0] = 100.0
             self.acceleration_vector_i[
                 2, :
-            ] = 10.0 * self.make_delayed_exponential_step(self.time_vector, 0, 1e-2)
+            ] = 10.0 * self.make_delayed_exponential_step(self.time_vector, 0, 1e-3)
 
             self.angular_acceleration_vector_b[
                 0, :
-            ] = 1.0 * self.make_delayed_exponential_step(self.time_vector, 2e-3, 1e-1)
+            ] = 1.0 * self.make_delayed_exponential_step(self.time_vector, 2e-3, 1e-3)
             self.angular_acceleration_vector_b[
                 1, :
-            ] = 2.0 * self.make_delayed_exponential_step(self.time_vector, 4e-3, 1e-1)
+            ] = 2.0 * self.make_delayed_exponential_step(self.time_vector, 4e-3, 1e-3)
             self.angular_acceleration_vector_b[
                 2, :
-            ] = 1 * self.make_delayed_exponential_step(self.time_vector, 1, 1e-1)
+            ] = 1 * self.make_delayed_exponential_step(self.time_vector, 5e-3, 1e-3)
 
         dt = self.time_vector[1] - self.time_vector[0]
         for idx in range(self.n - 1):
-            self.velocity_vector_i[:, idx + 1] = self.velocity_vector_i[:, idx] + (
-                self.acceleration_vector_i[:, idx]
-                + self.acceleration_vector_i[:, idx + 1]
-            ) * 0.5 * (self.time_vector[idx + 1] - self.time_vector[idx])
-            self.position_vector_i[:, idx + 1] = self.position_vector_i[:, idx] + (
-                self.velocity_vector_i[:, idx] + self.velocity_vector_i[:, idx + 1]
-            ) * 0.5 * (self.time_vector[idx + 1] - self.time_vector[idx])
+            self.velocity_vector_i[:, idx + 1] = (
+                self.velocity_vector_i[:, idx]
+                + (
+                    self.acceleration_vector_i[:, idx]
+                    + self.acceleration_vector_i[:, idx + 1]
+                )
+                * 0.5
+                * dt
+            )
+            self.position_vector_i[:, idx + 1] = (
+                self.position_vector_i[:, idx]
+                + (self.velocity_vector_i[:, idx] + self.velocity_vector_i[:, idx + 1])
+                * 0.5
+                * dt
+            )
             self.angular_velocity_vector_b[:, idx + 1] = (
                 self.angular_velocity_vector_b[:, idx]
                 + (
@@ -108,7 +114,7 @@ class Trajectory(object):
             )
             self.q_b_i[:, idx + 1] = fq.mult_quat(
                 p=self.q_b_i[:, idx],
-                q=fq.expMap(self.angular_velocity_vector_b[:, idx+1], dt=dt),
+                q=fq.expMap(self.angular_velocity_vector_b[:, idx + 1], dt=dt),
             )
             self.acceleration_vector_b[:, idx + 1] = (
                 fq.rotationMatrix(self.q_b_i[:, idx + 1]).T

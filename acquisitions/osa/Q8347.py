@@ -10,7 +10,7 @@
 
 from pathlib import Path
 import pyvisa
-from numpy import savetxt, asfarray, column_stack
+from numpy import asfarray, column_stack
 import matplotlib.pyplot as plt
 from time import sleep  # função para verificar o status byte do aparelho
 
@@ -25,7 +25,7 @@ class Q8347(object):
         object: _description_
     '''
 
-    def __init__(self, center=1550, gpib_adress='GPIB0::8::INSTR', span=None, high_resolution=True):
+    def __init__(self, center=1550, gpib_address='GPIB0::8::INSTR', span=None, high_resolution=True):
         '''
         __init__ constructor of Q8347 Advantest
 
@@ -37,10 +37,10 @@ class Q8347(object):
         # super(Q8347, self).__init__()
         rm = pyvisa.ResourceManager('@py')
         # rm.list_resources()
-        self.osa = rm.open_resource('GPIB0::8::INSTR')  # osa livre
-        self.osa.chunk_size = 65535  # configuraçoes da comunicaçao
-        self.osa.timeout = 20000  # configuraçoes da comunicaçao
-        self.osa.read_termination = '\n'  # configuraçoes da comunicaçao
+        self.osa = rm.open_resource(gpib_address)  # osa livre
+        self.osa.chunk_size = 65535  # comunitaiton setup
+        self.osa.timeout = 20000  # comunitaiton setup
+        self.osa.read_termination = '\n'  # comunitaiton setup
         if center != None:
             self.set_center(center)
         if span != None:
@@ -51,8 +51,8 @@ class Q8347(object):
             self.set_resolution(high=False)
 
     def checkSTB(self, t=1):  # FUNÇÃO BASEADA NO "wait of spectrometer" do Gabriel
-        sleep(1)  # Como o Advantest nao tem a função do GPIB (SRQ),
-        i = True  # é preciso usar uma funçõa de mais baixo nivel
+        sleep(1)  
+        i = True 
         while i:
             stb = self.osa.read_stb()
             if stb == 1:  # Quando o STB é igual a 1, o Advantest terminou
@@ -67,7 +67,7 @@ class Q8347(object):
 
         '''
         self.osa.write('MEA1')  # make a sigle measurement
-        self.checkSTB(0.5)  # cal the checkSTB() function and wait read ends
+        self.checkSTB()  # cal the checkSTB() function and wait read ends
         x = self.osa.query('OSD1')  # get wavelength
         y = self.osa.query('OSD0')  # get optical power
         # remove reader

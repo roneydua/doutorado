@@ -165,8 +165,8 @@ if __name__ == "__main__":
     # plot_accelerations_error(s,'pure_translational')
     # plot_all_states(s, name='pure_translational')
     # plot_deformations(s, name='pure_translational')
-    # s = loadData('data/translation_and_rotation_motions.pickle')
-    s = loadData('data/vertical_acceleration.pickle')
+    s = loadData('data/translation_and_rotation_motions.pickle')
+    # s = loadData('data/vertical_acceleration.pickle')
     # s = s.load_states(name='data/s1DoF_x.pickle')
     test = '_vertical'
     plot_accelerations(s, name='translation_and_rotation_motions'+test)

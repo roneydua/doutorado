@@ -84,8 +84,10 @@ class AccelModelInertialFrame(object):
         # Fiber diameter
         self.fiber_length = fiber_length
         """initial fiber length"""
+        self.optical_fiber_area = 0.25 * np.pi * (self.fiber_diameter**2)
+        """fiber optical area in m^2"""
         self.k = (
-            self.E * 0.25 * np.pi * (self.fiber_diameter**2)
+            self.E * self.optical_fiber_area
         ) / self.fiber_length
         """stiffness of optical fiber"""
         self.seismic_edge = seismic_edge
@@ -164,10 +166,10 @@ class AccelModelInertialFrame(object):
             "y-z",
             "-yz",
             "-y-z",
-            "zy",
-            "z-y",
-            "-zy",
-            "-z-y",
+            "xy",
+            "x-y",
+            "-xy",
+            "-x-y",
         ]
         # legend of numerical point
 
@@ -319,9 +321,9 @@ class AccelModelInertialFrame(object):
         """inertial position of body sensor"""
         rm = d_x[9:12]
         """inertial position of seismic mass"""
-        qb = d_x[12:16]
+        qb = d_x[12:16]  # /np.linalg.norm(d_x[12:16])
         """Atitude quaternion of body sensor"""
-        qm = d_x[16:20]
+        qm = d_x[16:20]  # /np.linalg.norm(d_x[16:20])
         """Atitude quaternion of seismic mass"""
         wb = d_x[20:23]
         """Angular velocity of body sensor"""
@@ -337,37 +339,34 @@ class AccelModelInertialFrame(object):
         for i in range(12):
             # compute f
             f_hat_dell[:, i] = (
-                rm
-                + rot_qm @ self.m_M[i, :]
-                - rb
-                - rot_qb @ self.b_B[i, :]
+                rm + rot_qm @ self.m_M[i, :] - rb - rot_qb @ self.b_B[i, :]
             )
             # calculate a norm of v to get deformation and versor of f
             f_norm = np.linalg.norm(f_hat_dell[:, i])
             # compute f_hat
             f_hat_dell[:, i] /= f_norm
             # compute f_hat_dell
-            f_hat_dell[:, i] *= (f_norm - self.fiber_length)
+            f_hat_dell[:, i] *= f_norm - self.fiber_length
             # sum for compute translational movements
             sum_f_hat_dell += f_hat_dell[:, i]
             sum_f_hat_dell_dfdq_M += (
                 fq.calc_dfdq(qm, self.m_M[i, :]).T @ f_hat_dell[:, i]
             )
             # NOTE: important signal of dfdq
-            sum_f_hat_dell_dfdq_B -= (
-                fq.calc_dfdq(qb, self.b_B[i, :]).T @ f_hat_dell[:, i]
+            sum_f_hat_dell_dfdq_B += (
+                -fq.calc_dfdq(qb, self.b_B[i, :]).T @ f_hat_dell[:, i]
             )
         dd_x[:3] = self.k * sum_f_hat_dell / self.base_sensor_mass
-        # dd_x[:3] += (self.damper_for_computation_simulations / self.base_sensor_mass) * (
-            # d_rm - d_rb
-        # )
+        dd_x[:3] -= (
+            self.damper_for_computation_simulations / self.base_sensor_mass
+        ) * (d_rm - d_rb)
         # calculate dd_rm
         dd_x[3:6] = -self.k * sum_f_hat_dell / self.seismic_mass
         # dd_x[5] += self.G
         # artificial damper
-        # dd_x[3:6] -= (self.damper_for_computation_simulations / self.seismic_mass) * (
-            # d_rm - d_rb
-        # )
+        dd_x[3:6] -= (self.damper_for_computation_simulations / self.seismic_mass) * (
+            d_rb - d_rm
+        )
         # calculate d_rb
         dd_x[6:9] = d_rb
         # calculate d_rm
@@ -389,10 +388,10 @@ class AccelModelInertialFrame(object):
             * Qb.T
             @ sum_f_hat_dell_dfdq_B
         )
-        dd_x[20:23] += (
-            self.damper_for_computation_simulations
-            * self.inertial_base_sensor_inv[0, 0]
-        ) * (rot_qb.T@rot_qm@wm - wb)
+        # dd_x[20:23] += (
+        #     self.damper_for_computation_simulations
+        #     * self.inertial_base_sensor_inv[0, 0]
+        # ) * (rot_qb.T@rot_qm@wm - wb)
         # calculate a angular acceleration of body sensor
         # ATTENTION! due to symmetry, the product fq.screwMatrix(wm) @ self.inertial_seismic_mass @ wm it is always zero!
 
@@ -402,10 +401,10 @@ class AccelModelInertialFrame(object):
             * self.inertial_seismic_mass_inv[0, 0]
             * (Qm.T @ sum_f_hat_dell_dfdq_M)
         )
-        dd_x[23:26] -= (
-            self.damper_for_computation_simulations
-            * self.inertial_seismic_mass_inv[0, 0]
-        ) * (wm - rot_qm.T@rot_qb@wb)
+        # dd_x[23:26] -= (
+        #     self.damper_for_computation_simulations
+        #     * self.inertial_seismic_mass_inv[0, 0]
+        # ) * (wm - rot_qm.T@rot_qb@wb)
         return dd_x
 
 
@@ -562,7 +561,7 @@ class InverseProblem(AccelModelInertialFrame):
                 (self.norm_of_estimated_f_B[i] - self.fiber_length)
                 / self.norm_of_estimated_f_B[i]
             ) * (
-                fq.calc_dfdq(v=self.m_M[i, :], q=self.estimated_q_M_B).T
+                fq.calc_dfdq(a=self.m_M[i, :], q=self.estimated_q_M_B).T
                 @ self.estimated_f_B[i, :]
             )
 

@@ -108,7 +108,7 @@
 ## ***************************************************************************
 ## See https://matplotlib.org/api/artist_api.html#module-matplotlib.lines
 ## for more information on line properties.
-lines.linewidth: .5               # line width in points
+lines.linewidth: .75               # line width in points
 #lines.linestyle: -                 # solid line
 #lines.color:     C0                # has no affect on plot(); see axes.prop_cycle
 #lines.marker:          None        # the default marker
@@ -359,8 +359,9 @@ text.latex.preamble: \usepackage[math]{anttor}\renewcommand{\familydefault}{\rmd
 ## Following are default face and edge colors, default tick sizes,
 ## default fontsizes for ticklabels, and so on.  See
 ## https://matplotlib.org/api/axes_api.html#module-matplotlib.axes
-axes.facecolor: FFFFFF # bmh
-#axes.facecolor:     white   # axes background color
+# axes.facecolor: FFFFFF # bmh
+axes.facecolor:     white   # axes background color
+# axes.facecolor: F0F0F0
 axes.edgecolor: black   # axes edge color
 #axes.linewidth:     0.8     # edge linewidth
 axes.grid: True   # display grid or not
@@ -416,7 +417,8 @@ axes.spines.right: False#True
 # axes.prop_cycle: cycler('linestyle', ['-', '--', ':', '-.']) * cycler('color', ['1f77b4', 'ff7f0e', '167021', 'd62728', 'cc11f0', '8c564b', 'e377c2', '7f7f7f', 'bcbd22', '17becf'])
 #axes.prop_cycle: cycler('linestyle', ['-', '--', ':', '-.']) * cycler('color', ['348ABD', 'A60628', '7A68A6', '467821', 'D55E00', 'CC79A7', '56B4E9', '009E73', 'F0E442', '0072B2'])
 # axes.prop_cycle: cycler('linestyle', ['-', '--', ':', '-.']) * cycler('color', ['e41a1c','377eb8','4daf4a','984ea3','ff7f00','ffff33','a65628','f781bf'])
-axes.prop_cycle: cycler('linestyle', ['-', '--', ':', '-.']) * cycler('color', ['ee7733','0077bb','ee3377','cc3311','000000','984ea3','33bbee','009914','666666'])
+# axes.prop_cycle: cycler('linestyle', ['-', '--', ':', '-.']) * cycler('color', ['ee7733','0077bb','ee3377','cc3311','000000','984ea3','33bbee','009914','666666'])
+axes.prop_cycle: cycler('linestyle', ['-', '--', ':', '-.']) * cycler('color', ['ee7733','0077bb','ee3377','009914','000000','984ea3','666666'])
 
 
 # color cycle for plot lines as list of string colorspecs:

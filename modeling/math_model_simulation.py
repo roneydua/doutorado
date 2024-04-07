@@ -68,9 +68,7 @@ class statesOfSimulation_object(object):
         ] = "Exact angular acceleration on body frame"
         """ Relative deformation with respect of the initial length (l-l0)/l. """
         self.hf["f"] = np.zeros(shape=(12, 3, self.hf["t"].size), dtype=np.float64)
-        self.hf["fiber_len"] = np.zeros(
-            shape=(12, self.hf["t"].size), dtype=np.float64
-        )
+        self.hf["fiber_len"] = np.zeros(shape=(12, self.hf["t"].size), dtype=np.float64)
         self.hf["true_relative_position"] = np.zeros(
             shape=(3, self.hf["t"].size), dtype=np.float64
         )
@@ -92,9 +90,9 @@ class statesOfSimulation_object(object):
 
 if __name__ == "__main__":
     accel = AccelModelInertialFrame(
-        damper_for_computation_simulations=0.02, fiber_length=0.003000000000
+        damper_for_computation_simulations=0.0, fiber_length=0.003000000000
     )
-    hdf5_file = "modeling_data.hdf5"
+    hdf5_file = "modeling_data_temp_2.hdf5"
     test_name = "complete_movement"
     # test_name = "translational_movement"
     # test_name = "angular_movement"
@@ -102,22 +100,22 @@ if __name__ == "__main__":
     if test_name in f.keys():
         del f[test_name]
     ff = f.require_group(test_name)
-    s = statesOfSimulation_object(tf=75e-3, dt=1e-5, hf=ff, accel=accel)
+    s = statesOfSimulation_object(tf=1000e-3, dt=1e-5, hf=ff, accel=accel)
     traj = Trajectory(s.hf["t"][:], test=test_name)
     # traj.plot_trajectories()
 
     # RK = RungeKutta(s.hf["x"].shape[0], accel.func_dd_x)
     # initial conditions for all quaternions as [1, 0, 0, 0]
     # initial misalignment
-    s.hf["x"][12:16, 0] = fq.eulerQuaternion(yaw=0, pitch=0, roll=0)  # qb
-    s.hf["x"][16:20, 0] = s.hf["x"][12:16, 0]#fq.eulerQuaternion(yaw=100, pitch=60, roll=0)  # qm
+    s.hf["x"][12:16, 0] = traj.q_b_i[:, 0]
+    s.hf["x"][16:20, 0] = traj.q_b_i[:, 0]
     # Set body sensor and seismic mass initial conditions
     s.hf["x"][:3, 0] = traj.velocity_vector_i[:, 0]  # body velocity
     s.hf["x"][3:6, 0] = traj.velocity_vector_i[:, 0]  # seismic mass velocity
-    
+
     s.hf["x"][6:9, 0] = traj.position_vector_i[:, 0]  # body position
     s.hf["x"][9:12, 0] = traj.position_vector_i[:, 0]  # seismic mass position
-    
+
     s.hf["x"][20:23, 0] = traj.angular_velocity_vector_b[:, 0]
     s.hf["x"][23:, 0] = traj.angular_velocity_vector_b[:, 0]
 
@@ -136,9 +134,11 @@ if __name__ == "__main__":
     s.hf["true_accel_b"][:] = traj.acceleration_vector_b
     s.hf["true_angular_acceleration_b"][:] = traj.angular_acceleration_vector_b
     s.hf["true_angular_velocity_b"][:] = traj.angular_velocity_vector_b
-    s.hf["true_relative_position"][:, 0] = accel.sms.r - accel.bss.r
     s.hf["true_relative_orientation"][:, 0] = fq.mult_quat(
         p=fq.conj(accel.bss.q), q=accel.sms.q
+    )
+    s.hf["true_relative_position"][:, 0] = (
+        fq.rotationMatrix(s.hf["x"][12:16, 0]).T @ accel.sms.r - accel.bss.r
     )
     # if s.hf["true_relative_orientation"][0, 0] < 0.1:
     #     s.hf["true_relative_orientation"][:, 0] *= -1
@@ -157,28 +157,31 @@ if __name__ == "__main__":
             # rtol=1e-10,
             # atol=1e-10,
             # start_step=1e-11,
-            max_step=5e-6,
+            max_step=1e-6,
             # dense_output=True,
         )
-        
+
         s.hf["x"][:, i + 1] = solution.y[:, -1]
+        # s.hf["x"][:, i + 1] = s.hf["x"][:, i] + s.hf.attrs["dt"] * accel.func_dd_x(
+        #     0, s.hf["x"][:, i]
+        # )
 
         # Put the body in specific trajectories
         s.hf["x"][:3, i + 1] = traj.velocity_vector_i[:, i + 1]
         s.hf["x"][6:9, i + 1] = traj.position_vector_i[:, i + 1]
         s.hf["x"][20:23, i + 1] = traj.angular_velocity_vector_b[:, i + 1]
 
-        # s.hf["x"][12:16, i + 1] = fq.mult_quat(
-        #     p=s.hf["x"][12:16, i],
-        #     q=fq.expMap(s.hf["x"][20:23, i + 1], dt=s.hf.attrs["dt"]),
-        # )
-        s.hf["x"][16:20, i + 1] = fq.mult_quat(
-            p=s.hf["x"][16:20, i],
-            q=fq.expMap(s.hf["x"][23:26, i + 1], dt=s.hf.attrs["dt"]),
+        s.hf["x"][12:16, i + 1] = fq.mult_quat(
+            p=s.hf["x"][12:16, i],
+            q=fq.expMap(s.hf["x"][20:23, i + 1], dt=s.hf.attrs["dt"]),
         )
+        # s.hf["x"][16:20, i + 1] = fq.mult_quat(
+        #     p=s.hf["x"][16:20, i],
+        #     q=fq.expMap(s.hf["x"][23:26, i + 1], dt=s.hf.attrs["dt"]),
+        # )
         # quaternion normalize
-        s.hf["x"][12:16, i + 1] /= np.linalg.norm(s.hf["x"][12:16, i + 1])
-        # s.hf["x"][16:20, i + 1] /= np.linalg.norm(s.hf["x"][16:20, i + 1])
+        # s.hf["x"][12:16, i + 1] /= np.linalg.norm(s.hf["x"][12:16, i + 1])
+        s.hf["x"][16:20, i + 1] /= np.linalg.norm(s.hf["x"][16:20, i + 1])
         # # update class structs to compute f vectors
         accel.update_states(
             rb=s.hf["x"][6:9, i + 1],
@@ -192,7 +195,9 @@ if __name__ == "__main__":
         ## take the f vector of integration
         s.hf["f"][:, :, i + 1] = accel.f
         s.hf["fiber_len"][:, i + 1] = np.linalg.norm(accel.f, axis=1)
-        s.hf["true_relative_position"][:, i + 1] = accel.sms.r - accel.bss.r
+        s.hf["true_relative_position"][:, i + 1] = fq.rotationMatrix(
+            s.hf["x"][12:16, i + 1]
+        ).T @ (accel.sms.r - accel.bss.r)
         s.hf["true_relative_orientation"][:, i + 1] = fq.mult_quat(
             p=fq.conj(accel.bss.q), q=accel.sms.q
         )

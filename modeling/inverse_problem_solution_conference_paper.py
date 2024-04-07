@@ -25,7 +25,9 @@ locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 # plt.style.use("default")
 plt.style.use("common_functions/roney3.mplstyle")
 my_colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
-plt.rcParams["figure.dpi"] = 1152
+plt.rcParams["figure.dpi"] = 72
+plt.rcParams["font.size"] = 8
+plt.rcParams["axes.titlesize"] = "x-small"
 FIG_L = 6.29
 FIG_A = (60.0) / 25.4
 
@@ -205,9 +207,7 @@ def plot_recover_acceleration():
     # fig.legend()
     if not ONLY_SHOW:
         plt.savefig(
-            "../tese/images/recover_translational_acceleration_"
-            + TEST_NAME
-            + ".pdf",
+            "../tese/images/recover_translational_acceleration_" + TEST_NAME + ".pdf",
             format="pdf",
         )
         plt.close(fig=3)
@@ -250,12 +250,9 @@ def plot_recover_angular_acceleration():
                 label=fff[j].attrs["method_name"],
                 # lw=lw,
             )
-            # sub_idx = np.argwhere(
-            #     (fff["t"][:] * 1e3 >= xmin) & (fff["t"][:] * 1e3 <= xmax)
-            # )
-            sub_idx = gf.find_index_of_x_span(xmin,xmax,fff["t"][:] * 1e3)
-            ymin = np.min(fff[j][i + 3, :][sub_idx[0]:sub_idx[1]])
-            ymax = np.max(fff[j][i + 3, :][sub_idx[0]:sub_idx[1]])
+            sub_idx = gf.find_index_of_x_span(xmin, xmax, fff["t"][:] * 1e3)
+            ymin = np.min(fff[j][i + 3, :][sub_idx[0] : sub_idx[1]])
+            ymax = np.max(fff[j][i + 3, :][sub_idx[0] : sub_idx[1]])
             ax[i, 1].set_ylim(ymin, ymax)
         ax[i, 0].plot(
             ff["t"][:] * 1e3,
@@ -285,30 +282,37 @@ def plot_recover_angular_acceleration():
 
 
 def plot_defromations():
-    
+
     f = h5py.File(H5PY_FILE_NAME, "r")
     accel = math_model_accel.AccelModelInertialFrame()
     ff = f[TEST_NAME]
     plt.close(2)
-    fig, ax = plt.subplots(3, 4, num=2, sharex=True, figsize=(FIG_L, FIG_A))
+    fig, ax = plt.subplots(3, 4, num=2, sharex=True, figsize=(FIG_L, FIG_A), dpi=288)
 
     for i, _ax in enumerate(ax.flat):
         _ax.plot(
-            1e3 * ff["t"][...],
-            1e6 * (ff["fiber_len"][i, :] / ff.attrs["fiber_length"] - 1.0),label=accel.leg[i]
+            ff["t"][...],
+            1e6 * (ff["fiber_len"][i, :] / ff.attrs["fiber_length"] - 1.0),
+            label=accel.leg[i],
         )
         _ax.legend()
         _ax.set_title(r"$\text{FBG}_{" + str(i + 1) + "}$")
         # _ax.set_xlim(50,55)
         # _ax.set_ylim(-50, 50)
 
-    fig.supylabel(r"Deformação $\frac{\ell-\ell_0}{\ell_0}\times{10}^{6}$")
-    fig.supxlabel(r"Tempo $[\unit{\ms}]$")
+    fig.supylabel(
+        r"Deformation $\frac{\ell-\ell_0}{\ell_0}[\unit{\micro\varepsilon}] $"
+    )
+    fig.supxlabel(r"Time $[\unit{\s}]$")
     # fig.legend()
-
+    ax[0, 0].set_xlim(right=0.5)
     if not ONLY_SHOW:
         plt.savefig(
-            "../tese/images/deformations_" + TEST_NAME + ".pdf", format="pdf"
+            "../papers/lawofs_2024/images/deformations_conference_paper"
+            + TEST_NAME
+            + ".png",
+            format="png",
+            dpi=144,
         )
         plt.close(fig=3)
     else:
@@ -334,45 +338,35 @@ def plot_inertial_states():
             # pass
             for col in range(3):
                 ax[lin, col].plot(
-                    1e3 * ff["t"][:],
+                    ff["t"][:],
                     np.float32(ff["x"][ind_x[lin] + col + 5, :]),
-                    label=r"$q_{" + str(col + 1) + "}$ Massa sísmica",
+                    label=r"$q_{" + str(col + 1) + "}$ Seismic mass",
                     lw=1.0,
                 )
                 ax[lin, col].plot(
-                    1e3 * ff["t"][:],
+                    ff["t"][:],
                     np.float32(ff["x"][ind_x[lin] + col + 1, :]),
-                    label=r"$q_{" + str(col + 1) + "}$ Base",
+                    label=r"$q_{" + str(col + 1) + "}$ Sensor base",
                 )
-            # ax[lin, 0].plot(
-            #     1e3 * ff["t"][:],
-            #     np.float32(ff["x"][ind_x[lin] + 4, :]),
-            #     label=r"$q_{0}$ Massa sísmica",
-            # )
-            # ax[lin, 0].plot(
-            #     1e3 * ff["t"][:],
-            #     np.float32(ff["x"][ind_x[lin], :]),
-            #     label=r"$q_{0}$ Base",
-            # )
             # ax[lin, 0].legend()
         else:
             for col in range(3):
                 ax[lin, col].plot(
-                    1e3 * ff["t"][:],
+                    ff["t"][:],
                     np.float32(ff["x"][ind_x[lin] + col + 3, :]),
                     lw=1.0,
                 )
-                ax[lin, col].plot(
-                    1e3 * ff["t"][:], np.float32(ff["x"][ind_x[lin] + col, :])
-                )
-    ax[0, 2].legend(["Massa sísmica", "Base"])
+                ax[lin, col].plot(ff["t"][:], np.float32(ff["x"][ind_x[lin] + col, :]))
+    ax[0, 2].legend(["Seismic mass", "Sensor base"])
     # ax[0,1].legend(["Massa sísmica", "Base"],ncols=2, loc="lower left", bbox_to_anchor=(-.50, 1.5,3,1.5),mode="expand")
     # fig.supylabel(r'Aceleração $[\unit{\meter\per\second\squared}]$')
-    fig.supxlabel(r"Tempo $[\unit{\ms}]$")
+    fig.supxlabel(r"Time $[\unit{\s}]$")
     # fig.legend()
+    ax[0,0].set_xlim(right=0.5)
     if not ONLY_SHOW:
         plt.savefig(
-            "../tese/images/all_states_" + TEST_NAME + ".pdf", format="pdf"
+            "../papers/lawofs_2024/images/states_paper_" + TEST_NAME + ".png",
+            format="png",
         )
         plt.close(fig=3)
     else:
@@ -401,9 +395,7 @@ def plot_length_of_fo():
     # fig.legend()
 
     if not ONLY_SHOW:
-        plt.savefig(
-            "../tese/images/length_of_fo_" + TEST_NAME + ".pdf", format="pdf"
-        )
+        plt.savefig("../tese/images/length_of_fo_" + TEST_NAME + ".pdf", format="pdf")
         plt.close(fig=2)
     else:
         plt.show()
@@ -502,9 +494,7 @@ def plot_ls_solution():
     ax[0].legend()
     if not ONLY_SHOW:
         plt.savefig(
-            "../tese/images/estimated_relative_orientation_"
-            + TEST_NAME
-            + ".pdf",
+            "../tese/images/estimated_relative_orientation_" + TEST_NAME + ".pdf",
             format="pdf",
         )
         plt.close(fig=5)
@@ -516,11 +506,11 @@ def plot_ls_solution():
 if __name__ == "__main__":
     # recover_acceleration()
     # plot_recover_acceleration()
-    # plot_inertial_states()
+    plot_inertial_states()
     # plot_recover_angular_acceleration()
     # plot_ls_solution()
-    plot_defromations()
-
+    # plot_defromations()
+    #
     duration = 1  # seconds
     freq = 100  # Hz
     os.system("play -nq -t alsa synth {} sine {}".format(duration, freq))
