@@ -26,16 +26,24 @@ from scipy.ndimage import shift
 
 
 class fbg_simulation(object):
-    def __init__(self):
-        f = h5py.File("./production_files_.hdf5", "r")
-        w_fbg_e_ = f["fbg_production/20231130/fbg4/wavelength_m"][:]
-        "wavelength in meters"
-        fbg_e_ = f["fbg_production/20231130/fbg4/reflectivity"][:, -1]
-        w_fbg_d_ = f["fbg_production/20231130/fbg9/wavelength_m"][:]
-        "wavelength in meters"
-        fbg_d_ = f["fbg_production/20231130/fbg9/reflectivity"][:, -1]
-        f.close()
+    def __init__(self, date, fbg_name_d, fbg_name_e):
+        f = h5py.File("./production_files.hdf5", "r")
+        # date = "20240328"
+        # fbg_name_d = "fbg12"
+        # fbg_name_e = "fbg15"
 
+        w_fbg_e_ = f["fbg_production/"+date+"/"+fbg_name_d+"/wavelength_m"][:]
+        "wavelength in meters"
+        fbg_e_ = f["fbg_production/"+date+"/"+fbg_name_d+"/reflectivity"][:, -1]
+        w_fbg_d_ = f["fbg_production/"+date+"/"+fbg_name_e+"/wavelength_m"][:]
+        "wavelength in meters"
+        fbg_d_ = f["fbg_production/"+date+"/"+fbg_name_e+"/reflectivity"][:, -1]
+        f.close()
+        w_fbg_d_argmax = fbg_d_.argmax()
+        self.w_fbg_max_d = w_fbg_d_[w_fbg_d_argmax]
+        w_fbg_e_argmax = fbg_e_.argmax()
+        self.w_fbg_max_e = w_fbg_e_[w_fbg_e_argmax]
+        
         self.w_fbg_d_interp, self.w_fbg_d = self.extend_vector(w_fbg_d_, "wavelength")
         "wavelength in meters"
         self.fbg_d = self.extend_vector(fbg_d_, "reflectivity")
@@ -49,7 +57,7 @@ class fbg_simulation(object):
         self.step_of_w_fbg = np.diff(self.w_fbg_d_interp).mean()
         "wavelength in meters"
 
-        self.amplitude_mw_by_nm = 20 / 20  # 20mW distributed in  40nm
+        self.amplitude_mw_by_nm = 20 / 10  # 20mW distributed in  40nm
         self.translate_fbgs(0)
 
     def extend_vector(self, v: np.ndarray, type_of_data: str):
@@ -57,7 +65,7 @@ class fbg_simulation(object):
             _w = np.hstack(
                 (v - (v.size * np.diff(v).mean()), v, v + (v.size * np.diff(v).mean()))
             )
-            return np.linspace(_w[0], _w[-1], 100_000), _w
+            return np.linspace(_w[0], _w[-1], 200_000), _w
 
         else:
             return np.hstack((np.zeros(v.size), v, np.zeros(v.size)))
@@ -89,7 +97,7 @@ class fbg_simulation(object):
 
 
 def power_vs_delta_lambda_animation():
-    fbgs = fbg_simulation()
+    fbgs = fbg_simulation(date="20240328", fbg_name_d="fbg12", fbg_name_e="fbg15")
     alpha = np.linspace(1, 0, 10)
     fig, ax = plt.subplots(
         2, 1, num=1, sharex=True, figsize=(FIG_L, FIG_A * 1.25), dpi=72
@@ -138,7 +146,7 @@ def power_vs_delta_lambda_animation():
         # ax[1].legend()
         ax[1].set_ylabel(r"Potência óptica [\unit{\milli\watt\per\nano\meter}]")
         ax[1].set_xlabel(r"Comprimento de onda [\unit{\nano\meter}]")
-        ax[0].set_xlim(left=1540, right=1560)
+        ax[0].set_xlim(left=1545, right=1560)
         plt.pause(0.01)
 
     # plt.savefig(
@@ -147,28 +155,27 @@ def power_vs_delta_lambda_animation():
     # plt.close(fig=1)
 
 
-def plot_power_vs_accel_accel1():
-    fbgs = fbg_simulation()
+def plot_power_vs_accel_accel1(date, fbg_name_d, fbg_name_e,fig_name_to_save):
+
+    fbgs = fbg_simulation(date=date,fbg_name_d=fbg_name_d,fbg_name_e=fbg_name_e)
     accel = AccelModelInertialFrame()
 
     def compute_delta_lambda(dd_r: float, delta_T=0.0):
-        lambda_e = 1548e-9
-        lambda_d = 1552e-9
+        # lambda_e = 1548e-9
+        # lambda_d = 1552e-9
+        lambda_d = fbgs.w_fbg_max_d
+        lambda_e = fbgs.w_fbg_max_e
         pe = 0.23
         alpha = 0.55e-6
         zeta = 8.60e-6
-        temp_var = (
-            1.0 - pe
-        ) * accel.seismic_mass * accel.fiber_length * dd_r / accel.E / np.pi / (
-            accel.fiber_diameter
-        ) ** 2 + (
+        temp_var = (1.0 - pe) * accel.seismic_mass * dd_r / (accel.E * np.pi * accel.fiber_diameter ** 2 )+ (
             alpha + zeta
         ) * delta_T
         delta_l_e = lambda_e * temp_var
         delta_l_d = lambda_d * temp_var
         return delta_l_e, delta_l_d
 
-    dd_r_vec = np.arange(-200, 200, 10)
+    dd_r_vec = np.arange(start=-100, stop=101, step=20)
     pot_vec = 0.0 * dd_r_vec
     delta_l_d = 0.0 * dd_r_vec
     delta_l_e = 0.0 * dd_r_vec
@@ -180,15 +187,30 @@ def plot_power_vs_accel_accel1():
         pot_vec[i] = fbgs.power_of_second_reflected_spectrum_mW
     fig, ax = plt.subplots(2, 1, num=1, sharex=True, figsize=(FIG_L, FIG_A))
     ax[0].plot(dd_r_vec, pot_vec, "-*")
-    ax[1].plot(dd_r_vec, -delta_l_e * 1e12, "-*")
-    ax[1].plot(dd_r_vec, delta_l_d * 1e12, "-*")
-    ax[1].legend([r"$\Delta\lambda_{g,1}$", r"$\Delta\lambda_{g,2}$"])
+    ax[1].plot(dd_r_vec, -delta_l_e * 1e9, "-*")
+    ax[1].plot(dd_r_vec, delta_l_d * 1e9, "-*")
+    print(fbgs.w_fbg_max_d)
+    ax[1].legend(
+        [
+            r"$\Delta\lambda_{g,"
+            + fbg_name_e[3:]
+            + "}$,"
+            + locale.format_string(f="%.4f", val=fbgs.w_fbg_max_d * 1e9)
+            + r"\unit{\nm}",
+            r"$\Delta\lambda_{g,"
+            + fbg_name_d[3:]
+            + "}$"
+            + locale.format_string(f="%.4f", val=fbgs.w_fbg_max_e * 1e9)
+            + r"\unit{\nm}",
+        ]
+    )
     ax[0].set_ylabel(r"Potência óptica [\unit{\nano\watt}]")
-    ax[1].set_ylabel("Variação do $\\lambda_{g} [\\unit{\\pico\\meter}]$")
+    ax[1].set_ylabel("Variação do $\\lambda_{g} [\\unit{\\nano\\meter}]$")
     ax[1].set_xlabel(
         r"Aceleração ${}^\mathcal{B}\ddot{\mathbf{r}}$ [\unit{\meter\per\second\squared}]"
     )
-    plt.savefig("../tese/images/plot_power_vs_accel_accel1.pdf", format="pdf")
+
+    plt.savefig("../tese/images/plot_power_vs_accel_"+fig_name_to_save+".pdf", format="pdf")
     plt.close(fig=1)
     print(
         "Accel is null in",
@@ -196,6 +218,7 @@ def plot_power_vs_accel_accel1():
         "with power in [nW] equal ",
         pot_vec[np.where(dd_r_vec == 0)[0][0]],
     )
+    # plt.show()
     # plt.pause(0.01)
 
 
@@ -217,3 +240,9 @@ def simulation_push_pull_symbolic():
     integral_f1_f2 = risch_integrate(f_1 * f_2, l).doit()
     print(sp.latex(integral_f1_f2))
     print(sp.latex(f_2))
+
+
+if __name__ == "__main__":
+    plot_power_vs_accel_accel1(date="20240328", fbg_name_d="fbg15", fbg_name_e="fbg12", fig_name_to_save="acc_6_axis_x")
+    plot_power_vs_accel_accel1(date="20240328", fbg_name_d="fbg10", fbg_name_e="fbg13", fig_name_to_save="acc_6_axis_y")
+    plot_power_vs_accel_accel1(date="20240328", fbg_name_d="fbg6", fbg_name_e="fbg11", fig_name_to_save="acc_6_axis_z")
