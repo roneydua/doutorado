@@ -35,9 +35,6 @@ class Trace(object):
 #         self = Trace(trace_name)
 
 
-
-
-
 class AQ6370D(Trace):
     """
     AQ6370D Classe AQ6370D com GPIB
@@ -48,12 +45,7 @@ class AQ6370D(Trace):
         object: _description_
     """
 
-    def __init__(
-        self,
-        center=1550,
-        gpib_address="GPIB0::1::INSTR",
-        span=None
-    ):
+    def __init__(self, center=1550, gpib_address="GPIB0::1::INSTR", span=None):
         """
         __init__ constructor of AQ6370D Advantest
         Args:
@@ -67,46 +59,43 @@ class AQ6370D(Trace):
         # self.osa.chunk_size = 65535  # comunitaiton setup
         self.osa.timeout = 200_000  # comunitaiton setup
         # self.osa.read_termination = "\r\n"  # comunitaiton setup
+        self.check_error()
         if center != None:
             self.set_center(center)
         if span != None:
             self.set_span(span)
 
-        self.trace = {
-            TRA: False,
-            TRB: False,
-            TRC: False,
-            TRD: False,
-            TRE: False,
-            TRF: False,
-            TRG: False,
-            TRH: False,
-        }
-        # self.trace
-        
-        
+        self.y_unit_dic = {0: "dBm", 1: "nW", 2: "dBm/nm", 3: "nW/nm"}
+        self.get_y_unit()
 
-    def checkSTB(self, t=1):  # FUNÇÃO BASEADA NO "wait of spectrometer" do Gabriel
-        sleep(1)  
-        i = True 
-        while i:
-            stb = self.osa.read_stb()
-            if stb == 1:  # Quando o STB é igual a 1, o Advantest terminou
-                i = False  # de fazer a ação que havia sido solicitada
-            else:
-                print("waiting")
-                sleep(t)
-        return
+    def get_y_unit(self):
+        self.y_unit = self.y_unit_dic[int(self.osa.query(":DISPlay:TRACE:Y1:UNIT?"))]
 
-    def set_resolution(self, resolution='20pm'):
-        '''set_resolution Set measurement resolution
+    def set_y_unit(self, unit="DBM/NM"):
+        self.osa.write(":DISPLAY:TRACE:Y1:UNIT " + unit)
+        self.get_y_unit()
 
+    def set_resolution(self, resolution="20pm"):
+        """set_resolution Set measurement resolution
         Args:
             resolution. Defaults to '20pm'.
-        '''
-        self.osa.write(":SENSE:BANDWIDTH:RESOLUTION "+resolution)
+        """
+        self.osa.write(":SENSE:BANDWIDTH:RESOLUTION " + resolution)
         self.resolution = self.osa.query(":sense:bandwidth?")
         print("current resolution ", self.resolution)
+
+    def set_sensitivity(self,sensitivity:str):
+        """set_sensitivity
+
+        Args:
+            sensitivity: NHLD -> Normal hold
+                NAUT -> Normal auto
+                NORMAL -> Normal
+                HIGH1 -> HIGH1 or HIGH1/CHOP
+                HIGH2 -> HIGH2 or HIGH2/CHOP
+                HIGH3 -> HIGH3 or HIGH3/CHOP
+        """
+        self.osa.write(":SENSE:SENSE "+sensitivity)
 
     def simple_sweep(self, trace="tra"):
         """
@@ -115,21 +104,21 @@ class AQ6370D(Trace):
                 trace: a string with trance name trX with X a letter of trace. For example, trc for trace C.
                     Defaults to trace A.
         """
-        
+
         self.osa.write(":INITIATE")  # make a sigle measurement
         # self.checkSTB(1)
         self.read(trace=trace)
 
-    def read(self, trace='tra'):
+    def read(self, trace="tra"):
         """
-        Read () performs a data acquisition and updates the wavelength_NM variables with wavelength and optical_power_dbm with dbm power.
-    Args:
-            trace: a string with trance name trX with X a letter of trace. For example, trc for trace C.
-                Defaults to trace A.
+            Read () performs a data acquisition and updates the wavelength_NM variables with wavelength and optical_power_dbm with dbm power.
+        Args:
+                trace: a string with trance name trX with X a letter of trace. For example, trc for trace C.
+                    Defaults to trace A.
         """
         # self.checkSTB(1)
-        self.x = self.osa.query(":TRACE:X? "+trace)  # get wavelength
-        self.y = self.osa.query(":TRACE:Y? "+trace)  # get optical power
+        self.x = self.osa.query(":TRACE:X? " + trace)  # get wavelength
+        self.y = self.osa.query(":TRACE:Y? " + trace)  # get optical power
         # remove reader
         # x = x[10:]
         # y = y[10:]
@@ -160,21 +149,12 @@ class AQ6370D(Trace):
         self.center = center
         self.osa.write(":SENSE:WAVELENGTH:CENTER " + str(center) + unit)
 
+    def check_error(self):
+        self.error = self.osa.query(":SYSTEM:ERROR?")
+        if int(self.error) != 0:
+            print(self.error)
+
     def close(self):
+        '''close Close serial comunication
+        '''
         self.osa.close()
-
-
-a = {"tra":Trace(trace_name="TRA")}
-a["trb"] = Trace(trace_name="TRB")
-'trc' in a.keys()
-
-trace = {
-    TRA: False,
-    TRB: False,
-    TRC: False,
-    TRD: False,
-    TRE: False,
-    TRF: False,
-    TRG: False,
-    TRH: False,
-}
