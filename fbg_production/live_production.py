@@ -11,7 +11,7 @@ import numpy as np
 import locale
 import matplotlib.pyplot as plt
 from time import sleep
-from acquisitions.Q8347 import Q8347
+from acquisitions.osa.Q8347 import Q8347
 from common_functions.generic_functions import reflectivity_transmition
 from datetime import datetime
 from pathlib import Path
@@ -28,7 +28,7 @@ FIG_A = (90.0) / 25.4
 SAVE_DATA = True
 
 
-osa = Q8347(center=1520, span=160, high_resolution=True)
+osa = Q8347(center=1018, span=15, high_resolution=True)
 osa.read()
 
 wavelength_m = osa.wavelength_m
@@ -74,7 +74,7 @@ while True:
 
 if SAVE_DATA:
     print("save data on hdf file")
-    f = h5py.File("fbg_production/dado_davi_20240402.hdf5", "a")
+    f = h5py.File("fbg_production/dados_davi_20240411.hdf5", "a")
     now = datetime.now()
     ff = f.require_group(now.strftime(r"%Y%m%d"))
     # check number of fbg on group
@@ -82,24 +82,24 @@ if SAVE_DATA:
     fff = ff.require_group("fbg" + str(1 + number_of_dataset))
     # fff.attrs['optical_fiber'] = 'sm1500(4.2/125)'
     fff.attrs["optical_fiber"] = "ps1250/1500"
-    fff.attrs["interferometer_angle_deg"] = "0.132"
+    fff.attrs["interferometer_angle_deg"] = "3.520"
     fff.attrs["placed_to_hydrogen"] = "20240208"
-    fff.attrs["Hydrogenation_chamber_removal"] = "20240328"
-    fff.attrs["room_temperature_C"] = "24.1"
+    fff.attrs["Hydrogenation_chamber_removal"] = "20240410"
+    fff.attrs["room_temperature_C"] = "26.3"
     fff.create_dataset("wavelength_m", data=wavelength_m)
     fff.create_dataset("optical_power_dbm", data=y_all)
     fff.create_dataset("reflectivity", data=reflectivity)
     f.close()
-    plt.savefig(
-        "fbg_production"
-        + "/fig_production_figs/"
-        + now.strftime(r"%Y%m%d")
-        + "/fbg"
-        + str(1 + number_of_dataset)
-        + ".png",
-        format="png",
-        transparent=False,
-    )
+    # plt.savefig(
+    #     "fbg_production"
+    #     + "/fig_production_figs/"
+    #     + now.strftime(r"%Y%m%d")
+    #     + "/fbg"
+    #     + str(1 + number_of_dataset)
+    #     + ".png",
+    #     format="png",
+    #     transparent=False,
+    # )
     plt.close()
 
 print("ok")
