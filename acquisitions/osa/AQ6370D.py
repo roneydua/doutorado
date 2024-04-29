@@ -6,11 +6,8 @@
 @Author  :   Roney D. Silva
 @Contact :   roneyddasilva@gmail.com
 """
-from inspect import Traceback
-from pathlib import Path
 import pyvisa
-from numpy import asfarray, column_stack
-import matplotlib.pyplot as plt
+from numpy import asfarray
 from time import sleep  # função para verificar o status byte do aparelho
 
 
@@ -67,9 +64,18 @@ class AQ6370D(Trace):
 
         self.y_unit_dic = {0: "dBm", 1: "nW", 2: "dBm/nm", 3: "nW/nm"}
         self.get_y_unit()
+        self.update_wavelength = True
 
     def get_y_unit(self):
         self.y_unit = self.y_unit_dic[int(self.osa.query(":DISPlay:TRACE:Y1:UNIT?"))]
+
+    def enable_update_wavelength(self):
+        """enable update of wavelength measurements"""
+        self.update_wavelength = True
+
+    def disable_update_wavelength(self):
+        """disable update of wavelength measurements"""
+        self.update_wavelength = False
 
     def set_y_unit(self, unit="DBM/NM"):
         self.osa.write(":DISPLAY:TRACE:Y1:UNIT " + unit)
@@ -84,7 +90,7 @@ class AQ6370D(Trace):
         self.resolution = self.osa.query(":sense:bandwidth?")
         print("current resolution ", self.resolution)
 
-    def set_sensitivity(self,sensitivity:str):
+    def set_sensitivity(self, sensitivity: str):
         """set_sensitivity
 
         Args:
@@ -95,7 +101,7 @@ class AQ6370D(Trace):
                 HIGH2 -> HIGH2 or HIGH2/CHOP
                 HIGH3 -> HIGH3 or HIGH3/CHOP
         """
-        self.osa.write(":SENSE:SENSE "+sensitivity)
+        self.osa.write(":SENSE:SENSE " + sensitivity)
 
     def simple_sweep(self, trace="tra"):
         """
@@ -117,13 +123,15 @@ class AQ6370D(Trace):
                     Defaults to trace A.
         """
         # self.checkSTB(1)
-        self.x = self.osa.query(":TRACE:X? " + trace)  # get wavelength
+        if self.update_wavelength:
+            self.x = self.osa.query(":TRACE:X? " + trace)  # get wavelength
+            self.wavelength_m = asfarray(self.x.split(","))
+
         self.y = self.osa.query(":TRACE:Y? " + trace)  # get optical power
         # remove reader
         # x = x[10:]
         # y = y[10:]
         # convert to numpy arrays
-        self.wavelength_m = asfarray(self.x.split(","))
         self.optical_power_dbm = asfarray(self.y.split(","))
 
     def set_span(self, span: float, unit="M"):
@@ -155,6 +163,5 @@ class AQ6370D(Trace):
             print(self.error)
 
     def close(self):
-        '''close Close serial comunication
-        '''
+        """close Close serial comunication"""
         self.osa.close()
