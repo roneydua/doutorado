@@ -8,6 +8,7 @@
 """
 
 import numpy as np
+from regex import B
 import sympy as sp
 from sympy.integrals.risch import risch_integrate
 import locale
@@ -26,24 +27,26 @@ from scipy.ndimage import shift
 
 
 class fbg_simulation(object):
-    def __init__(self, date, fbg_name_d, fbg_name_e):
+    def __init__(self, fbg_name_d, fbg_name_e):
         f = h5py.File("./production_files.hdf5", "r")
         # date = "20240328"
         # fbg_name_d = "fbg12"
         # fbg_name_e = "fbg15"
 
-        w_fbg_e_ = f["fbg_production/"+date+"/"+fbg_name_d+"/wavelength_m"][:]
+        w_fbg_e_ = f["fbg_production/" + fbg_name_d + "/wavelength_m"][:]
         "wavelength in meters"
-        fbg_e_ = f["fbg_production/"+date+"/"+fbg_name_d+"/reflectivity"][:, -1]
-        w_fbg_d_ = f["fbg_production/"+date+"/"+fbg_name_e+"/wavelength_m"][:]
+        fbg_e_ = f["fbg_production/" + fbg_name_d + "/reflectivity"][:, -1]
+
+        w_fbg_d_ = f["fbg_production/" + fbg_name_e + "/wavelength_m"][:]
         "wavelength in meters"
-        fbg_d_ = f["fbg_production/"+date+"/"+fbg_name_e+"/reflectivity"][:, -1]
+        fbg_d_ = f["fbg_production/" + fbg_name_e + "/reflectivity"][:, -1]
         f.close()
+        # find peak of power
         w_fbg_d_argmax = fbg_d_.argmax()
         self.w_fbg_max_d = w_fbg_d_[w_fbg_d_argmax]
         w_fbg_e_argmax = fbg_e_.argmax()
         self.w_fbg_max_e = w_fbg_e_[w_fbg_e_argmax]
-        
+
         self.w_fbg_d_interp, self.w_fbg_d = self.extend_vector(w_fbg_d_, "wavelength")
         "wavelength in meters"
         self.fbg_d = self.extend_vector(fbg_d_, "reflectivity")
@@ -57,7 +60,7 @@ class fbg_simulation(object):
         self.step_of_w_fbg = np.diff(self.w_fbg_d_interp).mean()
         "wavelength in meters"
 
-        self.amplitude_mw_by_nm = 20 / 10  # 20mW distributed in  40nm
+        self.amplitude_w_by_m = 20e-3 / 50e-9  # 20mW distributed in  40nm
         self.translate_fbgs(0)
 
     def extend_vector(self, v: np.ndarray, type_of_data: str):
@@ -86,13 +89,13 @@ class fbg_simulation(object):
         self.make_dot_product()
 
     def make_dot_product(self):
-        self.first_reflected_spectrum = self.amplitude_mw_by_nm * self.fbg_e_shifted
+        self.first_reflected_spectrum = self.amplitude_w_by_m * self.fbg_e_shifted
 
         self.second_reflected_spectrum = (
             self.first_reflected_spectrum * self.fbg_d_shifted
         )
-        self.power_of_second_reflected_spectrum_mW = (
-            np.trapz(y=self.second_reflected_spectrum) * self.step_of_w_fbg * 1e9
+        self.power_of_second_reflected_spectrum_W = (
+            np.trapz(y=self.second_reflected_spectrum) * self.step_of_w_fbg
         )
 
 
@@ -155,22 +158,26 @@ def power_vs_delta_lambda_animation():
     # plt.close(fig=1)
 
 
-def plot_power_vs_accel_accel1(date, fbg_name_d, fbg_name_e,fig_name_to_save):
+def plot_power_vs_accel_accel1(date, fbg_name_d, fbg_name_e, fig_name_to_save):
 
-    fbgs = fbg_simulation(date=date,fbg_name_d=fbg_name_d,fbg_name_e=fbg_name_e)
+    fbgs = fbg_simulation(date=date, fbg_name_d=fbg_name_d, fbg_name_e=fbg_name_e)
     accel = AccelModelInertialFrame()
 
     def compute_delta_lambda(dd_r: float, delta_T=0.0):
-        # lambda_e = 1548e-9
-        # lambda_d = 1552e-9
+        lambda_e = 1548e-9
+        lambda_d = 1552e-9
         lambda_d = fbgs.w_fbg_max_d
         lambda_e = fbgs.w_fbg_max_e
         pe = 0.23
         alpha = 0.55e-6
         zeta = 8.60e-6
-        temp_var = (1.0 - pe) * accel.seismic_mass * dd_r / (accel.E * np.pi * accel.fiber_diameter ** 2 )+ (
-            alpha + zeta
-        ) * delta_T
+        # calc epsilon with epsilon assembly and epsilon of measurement
+        # epsilon_m
+        epsilon_m = (
+            accel.seismic_mass * dd_r / (accel.E * np.pi * accel.fiber_diameter**2)
+        )
+        epsilon_a = 23e-4
+        temp_var = (1.0 - pe) * (epsilon_m + epsilon_a) + (alpha + zeta) * delta_T
         delta_l_e = lambda_e * temp_var
         delta_l_d = lambda_d * temp_var
         return delta_l_e, delta_l_d
@@ -210,7 +217,9 @@ def plot_power_vs_accel_accel1(date, fbg_name_d, fbg_name_e,fig_name_to_save):
         r"Aceleração ${}^\mathcal{B}\ddot{\mathbf{r}}$ [\unit{\meter\per\second\squared}]"
     )
 
-    plt.savefig("../tese/images/plot_power_vs_accel_"+fig_name_to_save+".pdf", format="pdf")
+    plt.savefig(
+        "../tese/images/plot_power_vs_accel_" + fig_name_to_save + ".pdf", format="pdf"
+    )
     plt.close(fig=1)
     print(
         "Accel is null in",
@@ -220,6 +229,81 @@ def plot_power_vs_accel_accel1(date, fbg_name_d, fbg_name_e,fig_name_to_save):
     )
     # plt.show()
     # plt.pause(0.01)
+
+
+def plot_power_vs_accel_complete_acc(
+    fbg_name_d: list[str],
+    fbg_name_e: list[str],
+    fig_name_to_save: str,
+    power_gradient=[1.0, 1.0, 1.0],
+):
+    accel = AccelModelInertialFrame()
+    fig, ax = plt.subplots(1, 1, num=1, sharex=True, figsize=(FIG_L, FIG_A))
+    legend_name = ["x", "y", "z"]
+    for left_fbg, right_fbg, row in zip(fbg_name_d, fbg_name_e, range(3)):
+
+        fbgs = fbg_simulation(fbg_name_d=right_fbg, fbg_name_e=left_fbg)
+
+        def compute_delta_lambda(dd_r: float, delta_T=0.0):
+            lambda_e = 1548.5e-9
+            lambda_d = 1551.75e-9
+            lambda_d = fbgs.w_fbg_max_d
+            lambda_e = fbgs.w_fbg_max_e
+            pe = 0.23
+            alpha = 0.55e-6
+            zeta = 8.60e-6
+            # calc epsilon with epsilon assembly and epsilon of measurement
+            # epsilon_m
+            epsilon_m = (
+                accel.seismic_mass * dd_r / (accel.E * np.pi * accel.fiber_diameter**2)
+            )
+            epsilon_a = 23e-4
+            temp_var = (1.0 - pe) * (power_gradient[row] * epsilon_m + epsilon_a) + (
+                alpha + zeta
+            ) * delta_T
+            delta_l_e = lambda_e * temp_var
+            delta_l_d = lambda_d * temp_var
+            return delta_l_e, delta_l_d
+
+        dd_r_vec = np.arange(start=-100, stop=100, step=20)
+        pot_vec = 0.0 * dd_r_vec
+        delta_l_d = 0.0 * dd_r_vec
+        delta_l_e = 0.0 * dd_r_vec
+
+        for i in range(len(dd_r_vec)):
+            delta_l_e[i], delta_l_d[i] = compute_delta_lambda(dd_r_vec[i], 0)
+            # print(delta_l_e[i], delta_l_d[i])
+            fbgs.translate_fbgs(
+                delta_lambda_d=delta_l_d[i], delta_lambda_e=-delta_l_e[i]
+            )
+            pot_vec[i] = fbgs.power_of_second_reflected_spectrum_W
+        # ax[row].plot(dd_r_vec, pot_vec*1e3, "-*",label=legend_name[row])
+        ax.plot(dd_r_vec, pot_vec * 1e3, "-*", label=legend_name[row])
+        # ax[1].plot(dd_r_vec, -delta_l_e * 1e9, "-*")
+        # ax[1].plot(dd_r_vec, delta_l_d * 1e9, "-*")
+        # ax[row].legend(
+        #     [
+        #         r"$\Delta\lambda_{g,"
+        #         + left_fbg[3:]
+        #         + "}$,"
+        #         + locale.format_string(f="%.4f", val=fbgs.w_fbg_max_d * 1e9)
+        #         + r"\unit{\nm}",
+        #         r"$\Delta\lambda_{g,"
+        #         + right_fbg[3:]
+        #         + "}$"
+        #         + locale.format_string(f="%.4f", val=fbgs.w_fbg_max_e * 1e9)
+        #         + r"\unit{\nm}",
+        #     ]
+        # )
+    # ax[1].set_ylabel(legend_name[row])
+
+    fig.supylabel(r"Potência óptica [\unit{\milli\watt}]")
+    ax.set_xlabel(
+        r"Aceleração ${}^\mathcal{B}\ddot{\mathbf{r}}$ [\unit{\meter\per\second\squared}]"
+    )
+    ax.legend()
+    plt.savefig("../tese/images/" + fig_name_to_save + ".pdf", format="pdf")
+    plt.close(fig=1)
 
 
 def simulation_push_pull_symbolic():
@@ -242,7 +326,48 @@ def simulation_push_pull_symbolic():
     print(sp.latex(f_2))
 
 
+def acc_4_analysis():
+    plot_power_vs_accel_accel1(
+        fbg_name_d="20240328/fbg15",
+        fbg_name_e="20240328/fbg12",
+        fig_name_to_save="acc_6_axis_x",
+    )
+    plot_power_vs_accel_accel1(
+        fbg_name_d="20240328/fbg10",
+        fbg_name_e="20240328/fbg13",
+        fig_name_to_save="acc_6_axis_y",
+    )
+    plot_power_vs_accel_accel1(
+        fbg_name_d="20240328/fbg6",
+        fbg_name_e="20240328/fbg11",
+        fig_name_to_save="acc_6_axis_z",
+    )
+
+
+def acc_4_analysis():
+    plot_power_vs_accel_complete_acc(
+        fbg_name_d=["20240207/fbg3", "20231130/fbg7", "20240207/fbg2"],
+        fbg_name_e=["20240207/fbg11", "20240207/fbg9", "20240207/fbg17"],
+        fig_name_to_save="acc_4_power_vs_accel",
+        power_gradient=[1.0, 1.0, 1.0],
+    )
+
+
+def acc_5_analysis():
+    plot_power_vs_accel_complete_acc(
+        fbg_name_d=["20240328/fbg15", "20240328/fbg10", "20240328/fbg6"],
+        fbg_name_e=["20240328/fbg11", "20240328/fbg12", "20240328/fbg13"],
+        fig_name_to_save="acc_5_power_vs_accel",
+    )
+
+
+def acc_6_analysis():
+    plot_power_vs_accel_complete_acc(
+        fbg_name_e=["20240207/fbg7", "20240328/fbg11", "20240328/fbg10"],
+        fbg_name_d=["20240207/fbg12", "20240328/fbg13", "20240328/fbg9"],
+        fig_name_to_save="acc_6_power_vs_accel",
+    )
+
+
 if __name__ == "__main__":
-    plot_power_vs_accel_accel1(date="20240328", fbg_name_d="fbg15", fbg_name_e="fbg12", fig_name_to_save="acc_6_axis_x")
-    plot_power_vs_accel_accel1(date="20240328", fbg_name_d="fbg10", fbg_name_e="fbg13", fig_name_to_save="acc_6_axis_y")
-    plot_power_vs_accel_accel1(date="20240328", fbg_name_d="fbg6", fbg_name_e="fbg11", fig_name_to_save="acc_6_axis_z")
+    pass
