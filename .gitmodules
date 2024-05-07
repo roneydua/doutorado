@@ -4,3 +4,6 @@
 [submodule "acquisitions"]
 	path = acquisitions
 	url = https://github.com/IEAv-EFO/acquisitions.git
+[submodule "fbg_production"]
+	path = fbg_production
+	url = https://github.com/IEAv-EFO/fbg-production.git
