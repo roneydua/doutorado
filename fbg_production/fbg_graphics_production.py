@@ -5,12 +5,15 @@
 @Time    :   2023/10/02 10:08:38
 @Author  :   Roney D. Silva
 @Contact :   roneyddasilva@gmail.com
+@About   :  Script to plot the graphics of the FBGs produced
 """
 
 import locale
 
 import h5py
+import matplotlib.axes
 import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
 import pandas as pd
 import regex
@@ -198,7 +201,7 @@ def remove_wrong_data(file_name: str, last_index: int, data_name: str):
     f.close()
 
 
-# remove_wrong_data("production_files.hdf5",25,"fbg_production/20240207/fbg3")
+remove_wrong_data("production_files.hdf5",20,"fbg_production/20240207/fbg3")
 
 
 def plot_graphics_with_pairs_acc_3():
@@ -231,16 +234,26 @@ def plot_graphics_with_pairs_acc_3():
 
 def plot_graphics_with_pairs_acc_4():
     """plot_graphics_with_pairs_acc_3 plot graphics of fbgs used on acc 3."""
-
-    def plot_fbg(ax: plt.axes, fbg_number: str, ff):
+    # def plot_min_max_deformation(ax:plt.axes,)
+    def plot_fbg(ax: matplotlib.axes._axes.Axes, fbg_number: str, ff, delta_lambda:float,plot_color:str):
         _fbg_name = regex.findall(r"[a-zA-Z]+", fbg_number)[0]
         _fbg_number = regex.findall(r"(\d+)", fbg_number)[0]
 
         ax.plot(
-            ff[fbg_number + "/wavelength_m"][:] * 1e6,
+            ff[fbg_number + "/wavelength_m"][:] * 1e9,
             ff[fbg_number + "/reflectivity"][:, -1],
-            label=_fbg_name.upper() + " " + _fbg_number,
+            plot_color,
+            label=_fbg_name.upper() + " " + _fbg_number,alpha=0.66
         )
+        # ax.plot(
+        #     ff[fbg_number + "/wavelength_m"][:] * 1e9 - delta_lambda,
+        #     ff[fbg_number + "/reflectivity"][:, -1],
+        #     plot_color,
+        #     alpha=0.33,
+        # )
+        
+        # ax.plot(delta_lambda+ff[fbg_number + "/wavelength_m"][:] * 1e9,
+        #     ff[fbg_number + "/reflectivity"][:, -1],plot_color)
         ax.legend()
 
     f = h5py.File("./production_files.hdf5", "r")
@@ -252,16 +265,16 @@ def plot_graphics_with_pairs_acc_4():
     # fbg5 fbg15
     fig.supxlabel(r"$\lambda [\unit{\nm}]$")
     fig.supylabel(r"Refletividade $[\unit{\percent}]$")
-    plot_fbg(ax[0], fbg_number="fbg3", ff=ff)
-    plot_fbg(ax[0], fbg_number="fbg11", ff=ff)
-    plot_fbg(ax[1], fbg_number="fbg7", ff=fff)
-    plot_fbg(ax[1], fbg_number="fbg9", ff=ff)
-    plot_fbg(ax[2], fbg_number="fbg2", ff=ff)
-    plot_fbg(ax[2], fbg_number="fbg17", ff=ff)
+    plot_fbg(ax[0], fbg_number="fbg3", ff=ff,delta_lambda=1.0,plot_color=my_colors[0])
+    plot_fbg(ax[0], fbg_number="fbg11", ff=ff, delta_lambda=-1.0, plot_color=my_colors[1])
+    plot_fbg(ax[1], fbg_number="fbg7", ff=fff, delta_lambda=1.0,plot_color=my_colors[0])
+    plot_fbg(ax[1], fbg_number="fbg9", ff=ff, delta_lambda=-1.0, plot_color=my_colors[1])
+    plot_fbg(ax[2], fbg_number="fbg2", ff=ff, delta_lambda=1.0, plot_color=my_colors[0])
+    plot_fbg(ax[2], fbg_number="fbg17", ff=ff, delta_lambda=-1.0, plot_color=my_colors[1])
     ax[0].set_ylabel("x")
     ax[1].set_ylabel("y")
     ax[2].set_ylabel("z")
-    # plt.show()
+    plt.show()
     plt.savefig("../tese/images/fbg_acc_4.pdf", format="pdf")
     plt.close()
 
@@ -315,10 +328,11 @@ def plot_graphics_with_pairs_acc_6():
         # argmax = ff[fbg_number]["reflectivity"][:, -1].argmax()
         # w_peak = ff[fbg_number]["wavelength_m"][argmax]
         # ax.vlines(w_peak*1e9,1,0)
+        _data = ff.name.split("/")[-1]
         ax.plot(
             ff[fbg_number + "/wavelength_m"][:] * 1e9,
             ff[fbg_number + "/reflectivity"][:, -1],
-            label=_fbg_name.upper() + " " + _fbg_number,
+            label=_fbg_name.upper() + " " + _fbg_number+",("+_data+")",
         )
         ax.legend()
 
@@ -326,41 +340,47 @@ def plot_graphics_with_pairs_acc_6():
     ff = f["fbg_production/20240328"]
     fff = f["fbg_production/20231130"]
     ffff = f["fbg_production/20240207"]
-    plt.close(fig=5)
-    fig1.clear()
-    fig1.set_dpi(144)
+    # plt.close(fig=5)
+    # fig1.clear()
     fig1, ax1 = plt.subplots(1, 1, num=7, sharex=True, figsize=(FIG_L, FIG_A))
-    # fbg5 fbg15
+    fig1.set_dpi(144)
+    # 20240328
     for i in [
         5,
         # 6,
         7,
         8,
-        9,
+        # 9,
         # 10,
-        # 11,
-        # 12,
-        # 13,
-        # 15
-        18,
+        11,
+        12,
+        13,
+        15,
+        # 18
     ]:
         plot_fbg(ax1, fbg_number="fbg" + str(i), ff=ff)
-    plot_fbg(ax1, fbg_number="fbg14", ff=fff)
-    for i in [4, 7, 10, 12]:
+    # 20231130
+    # plot_fbg(ax1, fbg_number="fbg14", ff=fff,data=fff.name.split('/')[-1])
+    # 20240207
+    for i in [4,
+            #   7,
+              10,
+            #   12
+              ]:
         plot_fbg(ax1, fbg_number="fbg" + str(i), ff=ffff)
-
-    fig.clear()
+    plt.show()
+    # fig.clear()
     # sn.set_palette("muted")
     # sn.set_palette("husl", 4)
     fig, ax = plt.subplots(3, 1, num=6, sharex=True, figsize=(FIG_L, FIG_A))
     fig.supxlabel(r"$\lambda [\unit{\nm}]$")
     fig.supylabel(r"Refletividade $[\unit{\percent}]$")
-    plot_fbg(ax=ax[0], fbg_number="fbg15", ff=ff)
-    plot_fbg(ax=ax[0], fbg_number="fbg12", ff=ff)
-    plot_fbg(ax=ax[1], fbg_number="fbg10", ff=ff)
+    plot_fbg(ax=ax[0], fbg_number="fbg7", ff=ffff)
+    plot_fbg(ax=ax[0], fbg_number="fbg12", ff=ffff)
+    plot_fbg(ax=ax[1], fbg_number="fbg11", ff=ff)
     plot_fbg(ax=ax[1], fbg_number="fbg13", ff=ff)
-    plot_fbg(ax=ax[2], fbg_number="fbg6", ff=ff)
-    plot_fbg(ax=ax[2], fbg_number="fbg11", ff=ff)
+    plot_fbg(ax=ax[2], fbg_number="fbg9", ff=ff)
+    plot_fbg(ax=ax[2], fbg_number="fbg10", ff=ff)
     ax[0].set_ylabel("x")
     ax[1].set_ylabel("y")
     ax[2].set_ylabel("z")

@@ -12,7 +12,7 @@ from pathlib import Path
 import pyvisa
 from numpy import asfarray, column_stack
 import matplotlib.pyplot as plt
-from time import sleep  # função para verificar o status byte do aparelho
+from time import sleep  
 
 
 class Q8347(object):

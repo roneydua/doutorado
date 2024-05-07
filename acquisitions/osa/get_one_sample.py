@@ -27,10 +27,10 @@ FIG_L = 6.29
 FIG_A = (90.0) / 25.4
 SAVE_DATA = True
 osa = AQ6370D(center=1551.5e-9, span=20e-9)
-osa.simple_sweep()
 osa.set_sensitivity("HIGH1")
-# FBG_NUMBER = "14"
-# TEST = "traction"
+osa.simple_sweep()
+FBG_NUMBER = "7"
+TEST = "traction"
 # TEST = "free"
 
 wavelength_m = osa.wavelength_m
@@ -46,9 +46,9 @@ y = osa.optical_power_dbm
 osa.close()
 
 
-if SAVE_DATA
+if SAVE_DATA:
     print("save data on hdf file")
-    f = h5py.File("acquisitions/osa/fbg_acc_5_montado.hdf5", "a")
+    f = h5py.File("acquisitions/osa/fbg_acc_6_montado.hdf5", "a")
     now = datetime.now()
     # ff = f.require_group("reflection_with_seismic_mass_locked")
     # check number of fbg on group
@@ -57,7 +57,7 @@ if SAVE_DATA
     fff = f.require_group("assembly/"+TEST+"/fbg"+FBG_NUMBER)
     # fff = f.require_group("assembly/free/fbg2")
     fff.attrs["y_unit"] = osa.y_unit
-    fff.attrs["room_temperature"] = 23
+    fff.attrs["room_temperature"] = 22
     # fff.attrs["angle_cleaved_deg"] = 30
     # fff.attrs["note"] = "circulator"
     # fff.attrs["note"] = "coupler"
