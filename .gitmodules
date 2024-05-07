@@ -1,3 +1,6 @@
 [submodule "calibration_acc_methods"]
 	path = calibration_acc_methods
 	url = https://github.com/IEAv-EFO/calibration-acc-methods
+[submodule "acquisitions"]
+	path = acquisitions
+	url = https://github.com/IEAv-EFO/acquisitions.git
