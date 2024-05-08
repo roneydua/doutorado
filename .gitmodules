@@ -7,3 +7,6 @@
 [submodule "fbg_production"]
 	path = fbg_production
 	url = https://github.com/IEAv-EFO/fbg-production.git
+[submodule "common_functions"]
+	path = common_functions
+	url = https://github.com/roneydua/common_functions.git
