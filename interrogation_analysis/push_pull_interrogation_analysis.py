@@ -29,17 +29,17 @@ from scipy.ndimage import shift
 class fbg_simulation(object):
     def __init__(self, fbg_name_d, fbg_name_e):
         f = h5py.File("./production_files.hdf5", "r")
-        # date = "20240328"
-        # fbg_name_d = "fbg12"
-        # fbg_name_e = "fbg15"
+        date = "20240328"
+        fbg_name_d = "fbg12"
+        fbg_name_e = "fbg15"
 
-        w_fbg_e_ = f["fbg_production/" + fbg_name_d + "/wavelength_m"][:]
+        w_fbg_e_ = f["fbg_production/"+date+"/" + fbg_name_d + "/wavelength_m"][:]
         "wavelength in meters"
-        fbg_e_ = f["fbg_production/" + fbg_name_d + "/reflectivity"][:, -1]
+        fbg_e_ = f["fbg_production/"+date+"/" + fbg_name_d + "/reflectivity"][:, -1]
 
-        w_fbg_d_ = f["fbg_production/" + fbg_name_e + "/wavelength_m"][:]
+        w_fbg_d_ = f["fbg_production/"+date+"/" + fbg_name_e + "/wavelength_m"][:]
         "wavelength in meters"
-        fbg_d_ = f["fbg_production/" + fbg_name_e + "/reflectivity"][:, -1]
+        fbg_d_ = f["fbg_production/"+date+"/" + fbg_name_e + "/reflectivity"][:, -1]
         f.close()
         # find peak of power
         w_fbg_d_argmax = fbg_d_.argmax()
@@ -100,26 +100,24 @@ class fbg_simulation(object):
 
 
 def power_vs_delta_lambda_animation():
-    fbgs = fbg_simulation(date="20240328", fbg_name_d="fbg12", fbg_name_e="fbg15")
-    alpha = np.linspace(1, 0, 10)
+    fbgs = fbg_simulation( fbg_name_d="fbg12", fbg_name_e="fbg15")
+    alpha = np.linspace(0, 1, 4)
     fig, ax = plt.subplots(
-        2, 1, num=1, sharex=True, figsize=(FIG_L, FIG_A * 1.25), dpi=72
+        2, 1, num=1, sharex=True, figsize=(FIG_L, FIG_A ),
+        # dpi=72
     )
 
-    index = 0
-    for i in np.arange(-1, 1, 0.2):
+    index = 1
+    for i in np.arange(-.6, 1.2, 0.6):
         #
         # ax.plot(fbgs.w_fbg_d * 1e9, fbgs.fbg_d_shifted)
         # ax.plot(fbgs.w_fbg_e * 1e9, fbgs.fbg_e_shifted)
-        fig.clear()
-        fig, ax = plt.subplots(
-            2, 1, num=1, sharex=True, figsize=(FIG_L, FIG_A * 1.25), dpi=72
-        )
+        # fig.clear()
         fbgs.translate_fbgs(i * 1e-9)
         ax[0].plot(
             fbgs.w_fbg_e_interp * 1e9,
             fbgs.fbg_e_shifted,
-            lw=0.5,
+            # lw=0.5,
             ls="-",
             color=my_colors[0],
             alpha=alpha[index],
@@ -127,16 +125,16 @@ def power_vs_delta_lambda_animation():
         ax[0].plot(
             fbgs.w_fbg_d_interp * 1e9,
             fbgs.fbg_d_shifted,
-            lw=0.5,
+            # lw=0.5,
             ls="-",
-            color=my_colors[1],
+            color=my_colors[3],
             alpha=alpha[index],
         )
         ax[0].set_ylabel("Refletividade")
         ax[1].plot(
             fbgs.w_fbg_d_interp * 1e9,
             fbgs.second_reflected_spectrum,
-            lw=0.5,
+            # lw=0.5,
             ls="-",
             color=my_colors[2],
             label=locale.format_string(
@@ -145,17 +143,17 @@ def power_vs_delta_lambda_animation():
             ),
             alpha=alpha[index],
         )
-        # index += 1e
+        index += 1
         # ax[1].legend()
         ax[1].set_ylabel(r"Potência óptica [\unit{\milli\watt\per\nano\meter}]")
         ax[1].set_xlabel(r"Comprimento de onda [\unit{\nano\meter}]")
         ax[0].set_xlim(left=1545, right=1560)
-        plt.pause(0.01)
+        # plt.pause(0.01)
 
-    # plt.savefig(
-    #     "../tese/images/power_vs_delta_lambda_animation.pdf", format="pdf"
-    # )
-    # plt.close(fig=1)
+    plt.savefig(
+        "../tese/images/power_vs_delta_lambda_animation.pdf", format="pdf"
+    )
+    plt.close(1)
 
 
 def plot_power_vs_accel_accel1(date, fbg_name_d, fbg_name_e, fig_name_to_save):

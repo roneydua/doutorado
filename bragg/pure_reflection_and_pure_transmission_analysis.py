@@ -18,7 +18,7 @@ import numpy as np
 import sympy as sp
 from IPython.core.interactiveshell import InteractiveShell
 from ipywidgets import fixed, interact, interactive
-from modeling.math_model_accel import AccelModel
+from modeling.math_model_accel import AccelModelInertialFrame
 from matplotlib import ticker
 from IPython.display import display, Markdown
 
@@ -35,7 +35,7 @@ plt.rcParams["figure.dpi"] = 288
 plt.rcParams["figure.figsize"] = (FIG_L, FIG_A)
 # Create a FBG on lambda with 1550nm
 
-accel = AccelModel()
+accel = AccelModelInertialFrame()
 max_deformation = accel.seismic_mass * 9.89 * 0.25 / accel.k / accel.fiber_length
 deformation_vector = np.linspace(-max_deformation,
                                  max_deformation,

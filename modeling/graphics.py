@@ -157,7 +157,7 @@ def plot_accelerations_error(s,name=''):
 
 
 if __name__ == "__main__":
-    # accel = AccelModel(fibers_with_info=np.array([1, 3, 5, 9], dtype=np.int8), inverse_problem_full=False)
+    # accel = AccelModelInertialFrame(fibers_with_info=np.array([1, 3, 5, 9], dtype=np.int8), inverse_problem_full=False)
 
     # s = loadData('data/translation_motions.pickle')
     # # s = s.load_states(name='data/s1DoF_x.pickle')

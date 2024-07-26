@@ -157,7 +157,7 @@ if __name__ == "__main__":
             # rtol=1e-10,
             # atol=1e-10,
             # start_step=1e-11,
-            max_step=1e-6,
+            # max_step=1e-6,
             # dense_output=True,
         )
 

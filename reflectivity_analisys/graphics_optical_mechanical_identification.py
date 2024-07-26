@@ -7,10 +7,10 @@
 @Contact :   roneyddasilva@gmail.com
 """
 
-from modeling.math_model_accel import AccelModel
+from modeling.math_model_accel import AccelModelInertialFrame
 import locale
-from debugpy import trace_this_thread
-import uncertainties as un
+
+# import uncertainties as un
 import h5py
 import matplotlib.pyplot as plt
 import numpy as np
@@ -25,14 +25,14 @@ my_colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 # plt.style.use("default")
 FIG_L = 6.29
 FIG_A = (90.0) / 25.4
-am = AccelModel()
+am = AccelModelInertialFrame()
 max_traction_10g = am.seismic_mass * 10.0 * 9.89 / 4.0
 # load data
 
 
 def plot_colleted_data_fbg_6():
-    # laod hdf5 file with source and fbg
-    _f = h5py.File("./../data/phd_data.hdf5", "r")
+    # load hdf5 file with source and fbg
+    _f = h5py.File("./phd_data.hdf5", "r")
     f = _f["optical_mechanical_identification/test_fibers/fbg_6/test_003/"]
     fbg_data = []
     source_data = []
@@ -88,7 +88,7 @@ def plot_colleted_data_fbg_6():
 
 
 def plot_reflectivity_of_colleted_data_fbg_6():
-    f = h5py.File("./../data/phd_data.hdf5", "r")[
+    f = h5py.File("./phd_data.hdf5", "r")[
         "optical_mechanical_identification/test_fibers/fbg_6/test_003/"
     ]
     fbg_data = []
@@ -133,7 +133,7 @@ def plot_reflectivity_of_colleted_data_fbg_6():
 
 
 def plot_reflectivity_of_colleted_data_fbg_6_zero_strain():
-    f = h5py.File("./../data/phd_data.hdf5", "r")[
+    f = h5py.File("./phd_data.hdf5", "r")[
         "optical_mechanical_identification/test_fibers/fbg_6/test_003/"
     ]
     fbg_data = []
@@ -325,3 +325,82 @@ def calc_reflectivity(fbg_n, test_n, w_start=1556, w_end=1570, plot_graphic=Fals
 # v = 0.16
 # n = 1.482
 # 1550 * (1.0 - 0.5 * n**2 * (p12 - v * (p11 + p12)))
+
+
+def identification_method_examples():
+    f = h5py.File("./phd_data.hdf5", "r")[
+        "optical_mechanical_identification/test_fibers/fbg_6/test_001/"
+    ]
+    w = f["fonte001/wavelength"][:]
+    pi = f["fonte001/power_dbm"][:]
+    r = f["fbg_6_001/reflectivity"][:]
+
+    fig, ax = plt.subplots(1, 1, num=1, figsize=(FIG_L, 0.75 * FIG_A))
+    ax.plot(w, pi, label="$\mathbf{p}_{\mathrm{I}}$")
+    ax.plot(w, mW_dbm(dbm_mW(dbm=pi) * 0.5), label="$\mathbf{p}_{\mathrm{II}}$")
+    reflected_spectrum = r * dbm_mW(dbm=pi) * 0.5
+    reflected_reference = dbm_mW(dbm=pi) * 0.5 * 0.04
+    ax.plot(w, mW_dbm(reflected_spectrum * 0.5), label="$\mathbf{p}_{\mathrm{r}}$")
+    ax.plot(
+        w,
+        mW_dbm((reflected_spectrum + reflected_reference) * 0.5),
+        label="$\mathbf{p}_{\mathrm{r^{\prime}}}$ (Método 1)",
+    )
+    ax.plot(
+        w,
+        mW_dbm((reflected_reference) * 0.5),
+        label="$\mathbf{p}_{\mathrm{r^{\prime}}}$ (Método 2)",
+    )
+
+    ax.set_xlim(1520, 1560)
+    ax.legend(ncols=2)
+    ax.set_ylim(bottom=-60)
+    ax.set_xlabel(r"$\lambda\,[\unit{\nm}]$")
+    ax.set_ylabel(r"Potência óptica [\unit{\dbm}]")
+    plt.savefig(
+        "../tese/images/identification_method_examples.pdf",
+        format="pdf",
+    )
+    plt.close(fig=1)
+    # transmistion figure
+
+    w = f["fonte001/wavelength"][:]
+    pi = f["fonte001/power_dbm"][:]
+    pii = f["fbg_6_001/power_dbm"][:]
+
+    fig, ax = plt.subplots(1, 1, num=1, figsize=(FIG_L, 0.75 * FIG_A))
+    ax.plot(w, pi, label="$\mathbf{p}_{\mathrm{I}}$")
+    ax.plot(w, pii, label="$\mathbf{p}_{\mathrm{II}}$")
+    ax.set_xlim(1520, 1560)
+    ax.legend(ncols=2)
+    ax.set_ylim(bottom=-45)
+    ax.set_xlabel(r"$\lambda\,[\unit{\nm}]$")
+    ax.set_ylabel(r"Potência óptica [\unit{\dbm}]")
+    plt.savefig(
+        "../tese/images/identification_method_examples_2.pdf",
+        format="pdf",
+    )
+    plt.close(fig=1)
+    f.close()
+
+
+def plot_time_elapsed_fbg_production():
+    f = h5py.File("./production_files.hdf5", "r")["fbg_production/20240328/fbg2"]
+    w = f["wavelength_m"][:]
+    pi = f["optical_power_dbm"][:]
+    r = f["reflectivity"][:]
+    fig.clear()
+    fig, ax = plt.subplots(2, 1, num=1, sharex=True, figsize=(FIG_L, FIG_A))
+    alpha_line = np.linspace(0, 1, 9,endpoint=True)
+    for i in range(0, 17, 2):
+        ax[0].plot(w*1e9, pi[:, i], "-", color=my_colors[0], alpha=alpha_line[i//2])
+        ax[1].plot(w * 1e9, r[:, i], "-", color=my_colors[0], alpha=alpha_line[i // 2])
+    # ax.set_ylim(bottom=-45)
+    ax[0].set_ylabel(r"Potência óptica [\unit{\dbm}]")
+    ax[1].set_ylabel(r"Refletividade")
+    ax[1].set_xlabel(r"$\lambda\,[\unit{\nm}]$")
+    plt.savefig(
+        "../tese/images/plot_time_elapsed_fbg_production.pdf",
+        format="pdf",
+    )
+    plt.close(1)

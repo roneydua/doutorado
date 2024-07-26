@@ -14,7 +14,7 @@ import locale
 import pandas as pd
 import matplotlib.pyplot as plt
 import lvm_read
-from modeling.math_model_accel import AccelModel
+from modeling.math_model_accel import AccelModelInertialFrame
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 # plt.style.use("default")
 plt.style.use("common_functions/roney3.mplstyle")
@@ -23,7 +23,7 @@ FIG_L = 6.29
 FIG_A = (90.0) / 25.4
 
 # get mass of seismic mass
-seismic_mass = AccelModel().seismic_mass
+seismic_mass = AccelModelInertialFrame().seismic_mass
 
 
 def traction_and_tension():
