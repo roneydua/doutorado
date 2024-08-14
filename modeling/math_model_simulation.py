@@ -89,8 +89,8 @@ class statesOfSimulation_object(object):
 
 
 if __name__ == "__main__":
-    accel = AccelModelInertialFrame(
-        damper_for_computation_simulations=0.0, fiber_length=0.003000000000
+    accel = AccelModelInertialFrame(seismic_edge=0.1,
+        damper_for_computation_simulations=0.0, fiber_length=0.01000000000
     )
     hdf5_file = "modeling_data_temp_2.hdf5"
     test_name = "complete_movement"
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     if test_name in f.keys():
         del f[test_name]
     ff = f.require_group(test_name)
-    s = statesOfSimulation_object(tf=1000e-3, dt=1e-5, hf=ff, accel=accel)
+    s = statesOfSimulation_object(tf=10, dt=1e-3, hf=ff, accel=accel)
     traj = Trajectory(s.hf["t"][:], test=test_name)
     # traj.plot_trajectories()
 
